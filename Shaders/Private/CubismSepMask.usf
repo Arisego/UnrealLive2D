@@ -1,0 +1,71 @@
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+/*=============================================================================
+    LensDistortionUVGeneration.usf: Generate lens distortion and undistortion
+    UV displacement map into a render target.
+
+    The pixel shader directly compute the distort viewport UV to undistort
+    viewport UV displacement using Sv_Position and the reference equations and
+    store them into the red and green channels.
+
+    However to avoid resolving with a ferrari method, or doing a newton method
+    on the GPU to compute the undistort viewport UV to distort viewport UV
+    displacement, this couple of shaders works as follow: The vertex shader
+    undistort the grid's vertices, and pass down to the pixel shader the viewport
+    UV of where they should have been on screen without undistortion. The pixel
+    shader can then generate the undistort viewport UV to distort viewport UV
+    displacement by just subtracting the pixel's viewport UV.
+=============================================================================*/
+
+#include "/Engine/Public/Platform.ush"
+
+float4x4 ProjectMatrix;
+float4x4 ClipMatrix;
+float4 BaseColor;
+float4 ChannelFlag;
+
+float TestFloat;
+
+void MainVS(
+    in uint GlobalVertexId : SV_VertexID,
+	float2 InPosition : ATTRIBUTE0,
+	float2 InUV       : ATTRIBUTE1,
+    out float2 OutUV : TEXCOORD0,
+    out float4 OutPosition : SV_POSITION,
+    out float4 ClipPosition : TEXCOORD1
+    )
+{
+	OutPosition = float4(InPosition,0,1);
+	ClipPosition = mul(float4(InPosition,0,1), ClipMatrix);
+
+    OutUV.x = InUV.x;
+	OutUV.y = 1.0 - +InUV.y;
+}
+
+Texture2D MainTexture;
+SamplerState MainSampler;
+Texture2D MaskTexture;
+SamplerState MaskSampler;
+
+
+void MainPS(
+    in noperspective float2 InUv : TEXCOORD0,
+    in float4 SvPosition : SV_POSITION,
+    in float4 ClipPosition : TEXCOORD1,
+    out float4 OutColor : SV_Target0
+    )
+{
+    float4 color = MainTexture.Sample(MainSampler, InUv) * BaseColor;
+    //float4 color = MainTexture.Sample(MainSampler, InUv);
+	color.xyz *= color.w;
+
+    float2 MaskUv = float2(ClipPosition.x, 1+ClipPosition.y);
+    MaskUv /= ClipPosition.w;
+
+    float4 clipMask = (1.0 - MaskTexture.Sample(MaskSampler, MaskUv)) * ChannelFlag;
+	float maskVal = clipMask.r + clipMask.g + clipMask.b + clipMask.a;
+	color = color * maskVal;
+    //float4 color = float4(maskVal, 0, 1-maskVal, TestFloat);
+
+	OutColor = color;
+}

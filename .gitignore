@@ -1,0 +1,7 @@
+/Saved
+/Intermediate
+/Binaries
+/Config
+
+*.lib
+*.a
