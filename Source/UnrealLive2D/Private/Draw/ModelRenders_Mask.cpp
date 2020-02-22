@@ -259,7 +259,6 @@ void FModelRenders::RenderMask_Full(
                 ////////////////////////////////////////////////////////////////////////////
 
                 RHICmdList.SetStreamSource(0, ScratchVertexBufferRHI, 0);
-                RHICmdList.DrawIndexedPrimitive(IndexBufferRHI, 0, 0, 4, 0, 2, 1);
 
                 RHICmdList.DrawIndexedPrimitive(
                     IndexBufferRHI,
@@ -403,7 +402,6 @@ void FModelRenders::RenderMask_Single(
             ////////////////////////////////////////////////////////////////////////////
 
             RHICmdList.SetStreamSource(0, ScratchVertexBufferRHI, 0);
-            RHICmdList.DrawIndexedPrimitive(IndexBufferRHI, 0, 0, 4, 0, 2, 1);
 
             RHICmdList.DrawIndexedPrimitive(
                 IndexBufferRHI,
