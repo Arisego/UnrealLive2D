@@ -69,3 +69,25 @@ void MainPS(
 
 	OutColor = color;
 }
+
+void MainPsInvert(
+    in noperspective float2 InUv : TEXCOORD0,
+    in float4 SvPosition : SV_POSITION,
+    in float4 ClipPosition : TEXCOORD1,
+    out float4 OutColor : SV_Target0
+    )
+{
+    float4 color = MainTexture.Sample(MainSampler, InUv) * BaseColor;
+    //float4 color = MainTexture.Sample(MainSampler, InUv);
+	color.xyz *= color.w;
+
+    float2 MaskUv = float2(ClipPosition.x, 1+ClipPosition.y);
+    MaskUv /= ClipPosition.w;
+
+    float4 clipMask = (1.0 - MaskTexture.Sample(MaskSampler, MaskUv)) * ChannelFlag;
+	float maskVal = clipMask.r + clipMask.g + clipMask.b + clipMask.a;
+	color = color * (1.0-maskVal);
+    //float4 color = float4(maskVal, 0, 1-maskVal, TestFloat);
+
+	OutColor = color;
+}
