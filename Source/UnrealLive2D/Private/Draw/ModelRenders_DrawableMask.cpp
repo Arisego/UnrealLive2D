@@ -14,6 +14,8 @@
 
 class FCubismSepMask : public FGlobalShader
 {
+    DECLARE_INLINE_TYPE_LAYOUT(FCubismSepMask, NonVirtual);
+
 public:
     static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
     {
@@ -66,33 +68,17 @@ public:
         SetSamplerParameter(RHICmdList, ShaderRHI, MaskSampler, TStaticSamplerState<SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
     }
 
-    virtual bool Serialize(FArchive& Ar) override
-    {
-        bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
-        Ar << TestFloat;
-        Ar << ProjectMatrix;
-        Ar << ClipMatrix;
-        Ar << BaseColor;
-        Ar << ChannelFlag;
-
-        Ar << MainTexture;
-        Ar << MaskTexture;
-        Ar << MainTextureSampler;
-        Ar << MaskSampler;
-        return bShaderHasOutdatedParameters;
-    }
-
 private:
-    FShaderParameter TestFloat;
-    FShaderParameter ProjectMatrix;
-    FShaderParameter ClipMatrix;
-    FShaderParameter BaseColor;
-    FShaderParameter ChannelFlag;
+    LAYOUT_FIELD(FShaderParameter, TestFloat);
+    LAYOUT_FIELD(FShaderParameter, ProjectMatrix);
+    LAYOUT_FIELD(FShaderParameter, ClipMatrix);
+    LAYOUT_FIELD(FShaderParameter, BaseColor);
+    LAYOUT_FIELD(FShaderParameter, ChannelFlag);
 
-    FShaderResourceParameter MainTexture;
-    FShaderResourceParameter MaskTexture;
-    FShaderResourceParameter MainTextureSampler;
-    FShaderResourceParameter MaskSampler;
+    LAYOUT_FIELD(FShaderResourceParameter, MainTexture);
+    LAYOUT_FIELD(FShaderResourceParameter, MaskTexture);
+    LAYOUT_FIELD(FShaderResourceParameter, MainTextureSampler);
+    LAYOUT_FIELD(FShaderResourceParameter, MaskSampler);
 };
 
 class FCubismSepMaskVS : public FCubismSepMask
@@ -220,7 +206,7 @@ void FModelRenders::_DrawSepMask_Normal(
             DisplacementMapResolution.X, DisplacementMapResolution.Y, 1.f);
 
         // Get shaders.
-        TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
+        FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
         TShaderMapRef< FCubismSepMaskVS > VertexShader_Mask(GlobalShaderMap);
         TShaderMapRef< FCubismSepMaskPS > PixelShader_Mask(GlobalShaderMap);
 
@@ -260,8 +246,8 @@ void FModelRenders::_DrawSepMask_Normal(
         /** TODO: If find some model use this */
         check(!tb_InvertMask);
 
-        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VertexShader_Mask);
-        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PixelShader_Mask);
+        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader_Mask.GetVertexShader();
+        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader_Mask.GetPixelShader();
 
         static FMatrix ts_FakeGlobal = FMatrix::Identity;
         FMatrix ts_MartixForDraw;
@@ -285,8 +271,8 @@ void FModelRenders::_DrawSepMask_Normal(
         FTexture2DRHIRef tsr_MaskBuffer = tp_States->MaskBuffer;
         FTextureRHIRef tsr_MaskTexture = tsr_MaskBuffer->GetTexture2D();
 
-        VertexShader_Mask->SetParameters(RHICmdList, VertexShader_Mask->GetVertexShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
-        PixelShader_Mask->SetParameters(RHICmdList, PixelShader_Mask->GetPixelShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
+        VertexShader_Mask->SetParameters(RHICmdList, VertexShader_Mask.GetVertexShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
+        PixelShader_Mask->SetParameters(RHICmdList, PixelShader_Mask.GetPixelShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
 
         //////////////////////////////////////////////////////////////////////////
         SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
@@ -349,7 +335,7 @@ void FModelRenders::_DrawSepMask_Normal(
              DisplacementMapResolution.X, DisplacementMapResolution.Y, 1.f);
 
          // Get shaders.
-         TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
+         FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
          TShaderMapRef< FCubismSepMaskVS > VertexShader_Mask(GlobalShaderMap);
          TShaderMapRef< FCubismSepMaskPS_Invert> PixelShader_Mask_Invert(GlobalShaderMap);
 
@@ -385,8 +371,8 @@ void FModelRenders::_DrawSepMask_Normal(
          FVector4 ts_BaseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
          ts_BaseColor.W = tf_Opacity;
 
-         GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VertexShader_Mask);
-         GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PixelShader_Mask_Invert);
+         GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader_Mask.GetVertexShader();
+         GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader_Mask_Invert.GetPixelShader();
 
 
          static FMatrix ts_FakeGlobal = FMatrix::Identity;
@@ -411,8 +397,8 @@ void FModelRenders::_DrawSepMask_Normal(
          FTexture2DRHIRef tsr_MaskBuffer = tp_States->MaskBuffer;
          FTextureRHIRef tsr_MaskTexture = tsr_MaskBuffer->GetTexture2D();
 
-         VertexShader_Mask->SetParameters(RHICmdList, VertexShader_Mask->GetVertexShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
-         PixelShader_Mask_Invert->SetParameters(RHICmdList, PixelShader_Mask_Invert->GetPixelShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
+         VertexShader_Mask->SetParameters(RHICmdList, VertexShader_Mask.GetVertexShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
+         PixelShader_Mask_Invert->SetParameters(RHICmdList, PixelShader_Mask_Invert.GetPixelShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
 
 
 

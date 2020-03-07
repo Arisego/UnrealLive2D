@@ -16,6 +16,8 @@
 //////////////////////////////////////////////////////////////////////////
 class FCubismSepShader : public FGlobalShader
 {
+    DECLARE_INLINE_TYPE_LAYOUT(FCubismSepShader, NonVirtual);
+
 public:
     static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
     {
@@ -54,23 +56,12 @@ public:
         SetSamplerParameter(RHICmdList, ShaderRHI, InTextureSampler, TStaticSamplerState<SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
     }
 
-    virtual bool Serialize(FArchive& Ar) override
-    {
-        bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
-        Ar << TestFloat;
-        Ar << BaseColor;
-
-        Ar << InTexture;
-        Ar << InTextureSampler;
-        return bShaderHasOutdatedParameters;
-    }
-
 private:
-    FShaderParameter TestFloat;
-    FShaderParameter BaseColor;
+    LAYOUT_FIELD(FShaderParameter, TestFloat);
+    LAYOUT_FIELD(FShaderParameter, BaseColor);
 
-    FShaderResourceParameter InTexture;
-    FShaderResourceParameter InTextureSampler;
+    LAYOUT_FIELD(FShaderResourceParameter, InTexture);
+    LAYOUT_FIELD(FShaderResourceParameter, InTextureSampler);
 };
 
 
@@ -158,7 +149,7 @@ void FModelRenders::DrawSepNormal(
             DisplacementMapResolution.X, DisplacementMapResolution.Y, 1.f);
 
         // Get shaders.
-        TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
+        FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
         TShaderMapRef< FCubismSepVS > VertexShader(GlobalShaderMap);
         TShaderMapRef< FCubismSepPS > PixelShader(GlobalShaderMap);
 
@@ -194,11 +185,11 @@ void FModelRenders::DrawSepNormal(
         FVector4 ts_BaseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
         ts_BaseColor.W = tf_Opacity;
 
-        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VertexShader);
-        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PixelShader);
+        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
+        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();
 
-        VertexShader->SetParameters(RHICmdList, VertexShader->GetVertexShader(), ts_BaseColor, tsr_TextureRHI);
-        PixelShader->SetParameters(RHICmdList, PixelShader->GetPixelShader(), ts_BaseColor, tsr_TextureRHI);
+        VertexShader->SetParameters(RHICmdList, VertexShader.GetVertexShader(), ts_BaseColor, tsr_TextureRHI);
+        PixelShader->SetParameters(RHICmdList, PixelShader.GetPixelShader(), ts_BaseColor, tsr_TextureRHI);
 
         //////////////////////////////////////////////////////////////////////////
         SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
@@ -237,7 +228,7 @@ void FModelRenders::DrawTestTexture(FTextureRenderTargetResource* OutTextureRend
             DisplacementMapResolution.X, DisplacementMapResolution.Y, 1.f);
 
         // Get shaders.
-        TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
+        FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(FeatureLevel);
         TShaderMapRef< FCubismSepVS > VertexShader(GlobalShaderMap);
         TShaderMapRef< FCubismSepPS > PixelShader(GlobalShaderMap);
 
@@ -257,12 +248,12 @@ void FModelRenders::DrawTestTexture(FTextureRenderTargetResource* OutTextureRend
             OutTextureRenderTargetResource->GetSizeX(), OutTextureRenderTargetResource->GetSizeY(), 1.f);
 
         // Shader
-        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VertexShader);
-        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PixelShader);
+        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
+        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();
 
         FVector4 ts_FakeBase = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
-        VertexShader->SetParameters(RHICmdList, VertexShader->GetVertexShader(), ts_FakeBase, tp_States->MaskBuffer->GetTexture2D());
-        PixelShader->SetParameters(RHICmdList, PixelShader->GetPixelShader(), ts_FakeBase, tp_States->MaskBuffer->GetTexture2D());
+        VertexShader->SetParameters(RHICmdList, VertexShader.GetVertexShader(), ts_FakeBase, tp_States->MaskBuffer->GetTexture2D());
+        PixelShader->SetParameters(RHICmdList, PixelShader.GetPixelShader(), ts_FakeBase, tp_States->MaskBuffer->GetTexture2D());
 
         // Texture
         //UTexture2D* tp_Texture = tp_States->Textures[0];
