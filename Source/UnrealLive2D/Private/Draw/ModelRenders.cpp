@@ -26,7 +26,7 @@ void FModelRenders::SetUpBlendMode(
     }
     case Rendering::CubismRenderer::CubismBlendMode_Additive:
     {
-        GraphicsPSOInit.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_One, BF_One, BO_Add, BF_Zero, BF_One>::GetRHI();
+        GraphicsPSOInit.BlendState = TStaticBlendState<CW_RGBA, BO_Add, BF_One, BF_One, BO_Add, BF_One, BF_One>::GetRHI();
         break;
     }
     case Rendering::CubismRenderer::CubismBlendMode_Multiplicative:
