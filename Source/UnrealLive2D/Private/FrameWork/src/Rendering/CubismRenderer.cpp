@@ -20,7 +20,7 @@ namespace Live2D { namespace Cubism { namespace Framework { namespace Rendering 
 
     void CubismRenderer::StaticRelease()
     {
-
+        
     }
 
 void CubismRenderer::Delete(CubismRenderer* renderer)

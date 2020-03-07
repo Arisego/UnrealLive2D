@@ -53,12 +53,7 @@ CubismUserModel::~CubismUserModel()
 {
     CSM_DELETE(_motionManager);
     CSM_DELETE(_expressionManager);
-
-    if (_moc)
-    {
-        _moc->DeleteModel(_model);
-    }
-    
+    _moc->DeleteModel(_model);
     CubismMoc::Delete(_moc);
     CSM_DELETE(_modelMatrix);
     CubismPose::Delete(_pose);
@@ -162,9 +157,9 @@ csmBool CubismUserModel::IsHit(CubismIdHandle drawableId, csmFloat32 pointX, csm
     return ((left <= tx) && (tx <= right) && (top <= ty) && (ty <= bottom));
 }
 
-ACubismMotion* CubismUserModel::LoadMotion(const csmByte* buffer, csmSizeInt size, const csmChar* name)
+ACubismMotion* CubismUserModel::LoadMotion(const csmByte* buffer, csmSizeInt size, const csmChar* name, ACubismMotion::FinishedMotionCallback onFinishedMotionHandler)
 {
-    return CubismMotion::Create(buffer, size);
+    return CubismMotion::Create(buffer, size, onFinishedMotionHandler);
 }
 
 void CubismUserModel::SetDragging(csmFloat32 x, csmFloat32 y)
