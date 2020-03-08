@@ -151,8 +151,8 @@ csmBool CubismUserModel::IsHit(CubismIdHandle drawableId, csmFloat32 pointX, csm
         }
     }
 
-    const csmFloat32 tx = _modelMatrix->InvertTransformX(pointX);
-    const csmFloat32 ty = _modelMatrix->InvertTransformY(pointY);
+    const csmFloat32 tx = pointX;
+    const csmFloat32 ty = pointY;
 
     return ((left <= tx) && (tx <= right) && (top <= ty) && (ty <= bottom));
 }

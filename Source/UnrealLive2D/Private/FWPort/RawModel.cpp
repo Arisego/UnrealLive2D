@@ -1,4 +1,4 @@
-﻿#include "RawModel.h"
+#include "RawModel.h"
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
 #include "CubismModelSettingJson.hpp"
@@ -12,13 +12,19 @@
 
 using namespace Live2D::Cubism::Framework;
 
+// 外部定義ファイル(json)と合わせる
 const csmChar* MotionGroupIdle = "Idle"; // アイドリング
+const csmChar* MotionGroupTapBody = "TapBody"; // 体をタップしたとき
 
 // モーションの優先度定数
 const csmInt32 PriorityNone = 0;
 const csmInt32 PriorityIdle = 1;
 const csmInt32 PriorityNormal = 2;
 const csmInt32 PriorityForce = 3;
+
+// 外部定義ファイル(json)と合わせる
+const csmChar* HitAreaNameHead = "Head";
+const csmChar* HitAreaNameBody = "Body";
 
 FRawModel::FRawModel()
 {
@@ -94,6 +100,9 @@ bool FRawModel::LoadAsset(const FString& InPath)
             *tstr_ModelPath,
             tb_ReadSuc ? 1 : 0
         );
+
+        UE_LOG(LogCubism, Log, TEXT("FRawModel::LoadAsset: %f, %f"), _model->GetCanvasWidth(), _model->GetCanvasHeight());
+
     }
 
     //Expression
@@ -267,6 +276,8 @@ void FRawModel::OnUpdate(float InDeltaTime)
     _model->LoadParameters(); // 前回セーブされた状態をロード
     if (_motionManager->IsFinished())
     {
+        OnMotionPlayEnd.ExecuteIfBound();
+
         // モーションの再生がない場合、待機モーションの中からランダムで再生する
         StartRandomMotion(MotionGroupIdle, PriorityIdle);
     }
@@ -466,6 +477,43 @@ CubismMotionQueueEntryHandle FRawModel::StartRandomMotion(const csmChar* group, 
     return StartMotion(group, no, priority);
 }
 
+void FRawModel::SetExpression(const Csm::csmChar* expressionID)
+{
+    ACubismMotion* motion = _expressions[expressionID];
+    check(_expressionManager);
+
+    if (motion != NULL)
+    {
+        _expressionManager->StartMotionPriority(motion, false, PriorityForce);
+    }
+    else
+    {
+        UE_LOG(LogCubism, Warning, TEXT("FRawModel::SetExpression: No expression found [%s]"), UTF8_TO_TCHAR(expressionID));
+    }
+}
+
+void FRawModel::SetRandomExpression()
+{
+    if (_expressions.GetSize() == 0)
+    {
+        return;
+    }
+
+    csmInt32 no = rand() % _expressions.GetSize();
+    csmMap<csmString, ACubismMotion*>::const_iterator map_ite;
+    csmInt32 i = 0;
+    for (map_ite = _expressions.Begin(); map_ite != _expressions.End(); map_ite++)
+    {
+        if (i == no)
+        {
+            csmString name = (*map_ite).First;
+            SetExpression(name.GetRawString());
+            return;
+        }
+        i++;
+    }
+}
+
 void FRawModel::ReleaseMotions()
 {
     for (csmMap<csmString, ACubismMotion*>::const_iterator iter = _motions.Begin(); iter != _motions.End(); ++iter)
@@ -484,4 +532,47 @@ void FRawModel::ReleaseExpressions()
     }
 
     _expressions.Clear();
+}
+
+bool FRawModel::HitTest(const Csm::csmChar* hitAreaName, Csm::csmFloat32 x, Csm::csmFloat32 y)
+{
+    // 透明時は当たり判定なし。
+    if (_opacity < 1)
+    {
+        return false;
+    }
+
+
+    const csmInt32 count = _modelSetting->GetHitAreasCount();
+    for (csmInt32 i = 0; i < count; i++)
+    {
+        if (strcmp(_modelSetting->GetHitAreaName(i), hitAreaName) == 0)
+        {
+            const CubismIdHandle drawID = _modelSetting->GetHitAreaId(i);
+            return IsHit(drawID, x, y);
+        }
+    }
+    return false; // 存在しない場合はfalse
+}
+
+void FRawModel::PlayMotion(const FString& InName, const int32 InNo, const int32 InPriority)
+{
+    StartMotion(TCHAR_TO_UTF8(*InName), InNo, (int32)InPriority);
+}
+
+bool FRawModel::OnTap(csmFloat32 x, csmFloat32 y)
+{
+
+    if (HitTest(HitAreaNameHead, x, y))
+    {
+        SetRandomExpression();
+        return true;
+    }
+    else if (HitTest(HitAreaNameBody, x, y))
+    {
+        StartRandomMotion(MotionGroupTapBody, PriorityNormal);
+        return true;
+    }
+
+    return false;
 }

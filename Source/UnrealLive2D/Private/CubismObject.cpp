@@ -54,7 +54,7 @@ void UCubismObject::Tick(float DeltaTime)
             _TimeLastUpdate = _TimeSeconds;
 
             msp_Render->DrawSeparateToRenderTarget(GetWorld(), TargetRender);
-            UE_LOG(LogCubism, Log, TEXT("Update: %f at %f || %f %f"), DeltaTime, GetWorld()->GetTimeSeconds(), _TimeSeconds, _TimeNextUpdate);
+            UE_LOG(LogCubism, Verbose, TEXT("Update: %f at %f || %f %f"), DeltaTime, GetWorld()->GetTimeSeconds(), _TimeSeconds, _TimeNextUpdate);
 		}
 		else
 		{
@@ -112,6 +112,7 @@ void UCubismObject::LoadFromPath(const FString& InPath)
 	}
 
 	msp_Render->InitRender(msp_RawModel, ModelConfig);
+    msp_RawModel->OnMotionPlayEnd.BindUObject(this, &UCubismObject::OnMotionPlayeEnd);
 }
 
 void UCubismObject::SetUpdatePaused(bool InIsPaused)
@@ -120,3 +121,37 @@ void UCubismObject::SetUpdatePaused(bool InIsPaused)
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+void UCubismObject::OnMotionPlayeEnd_Implementation()
+{
+	UE_LOG(LogCubism, Log, TEXT("UCubismObject::OnMotionPlayeEnd"));
+}
+
+bool UCubismObject::OnTap(const FVector2D& InPos)
+{
+    if (!msp_RawModel.IsValid())
+    {
+        UE_LOG(LogCubism, Error, TEXT("UCubismObject::OnTap: No valid model"));
+        return false;
+    }
+
+	bool tb_Handled = msp_RawModel->OnTap(InPos.X, InPos.Y);
+	UE_LOG(LogCubism, Log, TEXT("UCubismObject::OnTap: %s %d"),
+		*InPos.ToString(),
+		tb_Handled ? 1 : 0
+	);
+
+	return tb_Handled;
+}
+
+void UCubismObject::PlayMotion(const FString& InName, const int32 InNo, const EMotionPriority InPriority /*= EMotionPriority::EMP_Normal*/)
+{
+    if (!msp_RawModel.IsValid())
+    {
+        UE_LOG(LogCubism, Error, TEXT("UCubismObject::PlayMotion: No valid model"));
+        return;
+    }
+
+	UE_LOG(LogCubism, Log, TEXT("UCubismObject::PlayMotion: %s_%d | %d"), *InName, InNo, (int32)InPriority);
+    msp_RawModel->PlayMotion(InName, InNo, (int32)InPriority);
+}

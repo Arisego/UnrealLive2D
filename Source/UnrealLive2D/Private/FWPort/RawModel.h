@@ -5,6 +5,7 @@
 #include "CubismFramework.hpp"
 #include "Model/CubismUserModel.hpp"
 #include "Motion/CubismMotionQueueManager.hpp"
+#include "CubismUeTypes.h"
 
 
 class FRawModel : public Csm::CubismUserModel
@@ -25,6 +26,9 @@ public:
 private:
     Csm::CubismMotionQueueEntryHandle StartMotion(const Csm::csmChar* group, Csm::csmInt32 no, Csm::csmInt32 priority);
     Csm::CubismMotionQueueEntryHandle StartRandomMotion(const Csm::csmChar* group, Csm::csmInt32 priority);
+
+    void SetExpression(const Csm::csmChar* expressionID);
+    void SetRandomExpression();
 
 private:
     FString _HomeDir;
@@ -58,4 +62,15 @@ private:
     void ReleaseMotions();
     void ReleaseExpressions();
     float _userTimeSeconds;
+
+    bool HitTest(const Csm::csmChar* hitAreaName, Csm::csmFloat32 x, Csm::csmFloat32 y);
+
+    //////////////////////////////////////////////////////////////////////////
+    /** Link to UE4 */
+public:
+    FSimpleDelegate OnMotionPlayEnd;
+
+    void PlayMotion(const FString& InName, const int32 InNo, const int32 InPriority);
+
+    bool OnTap(float x, float y);
 };
