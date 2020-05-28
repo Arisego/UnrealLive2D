@@ -2,7 +2,7 @@
 
 Unreal Engine plugin for Live2D model.
 
-![ScreenShot](./Docs/Image/ScreenShot.Gif)
+![Screen Shot](Docs/Image/ScreenShot.GIF?raw=true)
 
 The model logic part is based on [CubismNativeFramework](https://github.com/Live2D/CubismNativeFramework/). 
 
