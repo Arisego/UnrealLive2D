@@ -2,12 +2,15 @@
 
 Unreal Engine plugin for Live2D model.
 
-The model logic part is based on [CubismNativeFramework](https://github.com/Live2D/CubismNativeFramework/), some of the original comment is not removed to make it easier to work with SDK
-version change.
+![ScreenShot](./Docs/Image/ScreenShot.Gif)
+
+The model logic part is based on [CubismNativeFramework](https://github.com/Live2D/CubismNativeFramework/). 
 
 The render part take advantage of the [global shader plugin system](https://docs.unrealengine.com/en-US/Programming/Rendering/ShaderInPlugin/QuickStart/index.html). 
 
 ## Usage
+
+> A sample of the plugin usage can be found [here](https://github.com/Arisego/Live2DTest).
 
 Put this plugin in your project's Plugin folder will work.
 
@@ -16,8 +19,6 @@ You must donwload the corresponding version of [Cubism Native SDK](https://www.l
 After plugin is compiled and installed, you can find *CubismMap* in plugin content folder. That's the sample map showing how model is rendered to RenderTarget and then displayed in UMG and World.
 
 If you want to package game with the models in plugin folder, remeber to add `../Plugins/UnrealLive2D/Content/Samples` to your package copy path.
-
-A sample of the plugin usage can be found [here](https://github.com/Arisego/Live2DTest).
 
 ## Notice
 
