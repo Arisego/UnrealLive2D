@@ -234,6 +234,7 @@ void FModelRenders::RenderMask_Full(
                 FillVertexBuffer(tp_Model, clipDrawIndex, ScratchVertexBufferRHI, tp_States, RHICmdList);
 
                 ////////////////////////////////////////////////////////////////////////////
+                SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
 
                 FMatrix ts_MartixForMask;
                 FVector4 ts_BaseColor;
@@ -243,7 +244,6 @@ void FModelRenders::RenderMask_Full(
 
                 VertexShader->SetParameters(RHICmdList, VertexShader.GetVertexShader(), ts_MartixForMask, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI);
                 PixelShader->SetParameters(RHICmdList, PixelShader.GetPixelShader(), ts_MartixForMask, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI);
-                SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
 
                 ////////////////////////////////////////////////////////////////////////////
 
