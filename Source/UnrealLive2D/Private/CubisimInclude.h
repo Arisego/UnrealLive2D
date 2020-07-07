@@ -1,6 +1,11 @@
 
+#if PLATFORM_WINDOWS
+#include "Windows\AllowWindowsPlatformTypes.h"
+#endif
 
-//#include "Windows\AllowWindowsPlatformTypes.h"
 #include "Live2DCubismCore.hpp"
 #include "CubismFramework.hpp"
-//#include "Windows\HideWindowsPlatformTypes.h"
+
+#if PLATFORM_WINDOWS
+#include "Windows\HideWindowsPlatformTypes.h"
+#endif
