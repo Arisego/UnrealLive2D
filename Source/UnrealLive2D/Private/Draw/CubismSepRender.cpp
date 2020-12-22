@@ -109,7 +109,7 @@ static void DrawSeparateToRenderTarget_RenderThread(
         //////////////////////////////////////////////////////////////////////////
         {
             FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-            RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
+            RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
 
             FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, OutTextureRenderTargetResource->TextureRHI);
             RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawClear"));
@@ -326,9 +326,9 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
 
     const csmInt32 bufferHeight = RenderStates._ClippingManager->GetClippingMaskBufferSize();
 
-    ETextureCreateFlags Flags = TexCreate_None;
-    Flags |= TexCreate_RenderTargetable;
-    Flags |= TexCreate_ShaderResource;
+    ETextureCreateFlags Flags = ETextureCreateFlags(TexCreate_None| TexCreate_RenderTargetable| TexCreate_ShaderResource);
+    //Flags |= TexCreate_RenderTargetable;
+    //Flags |= TexCreate_ShaderResource;
     //Flags |= TexCreate_Dynamic;
     FRHIResourceCreateInfo CreateInfo;
     CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
