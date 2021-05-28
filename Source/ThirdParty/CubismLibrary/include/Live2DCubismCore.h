@@ -289,6 +289,25 @@ extern "C"
      */
     csmApi float* csmCallingConvention csmGetParameterValues(csmModel* model);
 
+    /**
+     * Gets number of key values of each parameter.
+     *
+     * @param  model  Model to query.
+     *
+     * @return  Valid pointer on success; '0' otherwise.
+     */
+    csmApi const int* csmCallingConvention csmGetParameterKeyCounts(const csmModel* model);
+
+    /**
+     * Gets key values of each parameter.
+     *
+     * @param  model  Model to query.
+     *
+     * @return  Valid pointer on success; '0' otherwise.
+     */
+    csmApi const float** csmCallingConvention csmGetParameterKeyValues(const csmModel* model);
+
+
     /* ----- *
      * PARTS *
      * ----- */
