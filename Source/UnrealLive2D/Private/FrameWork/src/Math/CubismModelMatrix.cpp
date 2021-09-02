@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright(c) Live2D Inc. All rights reserved.
  *
  * Use of this source code is governed by the Live2D Open Software license
@@ -20,7 +20,7 @@ CubismModelMatrix::CubismModelMatrix(csmFloat32 w, csmFloat32 h)
     _width = w;
     _height = h;
 
-    SetHeight(1.0f);
+    SetHeight(2.0f);
 }
 
 CubismModelMatrix::~CubismModelMatrix()
