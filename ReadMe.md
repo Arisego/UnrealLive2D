@@ -22,7 +22,7 @@ If you want to package game with the models in plugin folder, remeber to add `..
 
 ## Notice
 
-This plugin should work on all the platform that Cubism Native SDK supported. If you want to work with platform other than __Win64__, you have to do some config work in `UnrealLive2D.Build.cs`.
+This plugin was tested on __Win64__ envrioment only, it was supposed to work on all the platform that Cubism Native SDK supported, but some additional work might be needed. You can start with configuring `UnrealLive2D.Build.cs`.
 
 Render result is only tested with *Hiyori* and *Mark*.
 
