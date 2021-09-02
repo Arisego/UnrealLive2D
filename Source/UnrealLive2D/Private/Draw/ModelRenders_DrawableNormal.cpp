@@ -136,7 +136,7 @@ void FModelRenders::DrawSepNormal(
     check(indexCount > 0&& "Bad Index Count");
 
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparate"));
@@ -213,7 +213,7 @@ void FModelRenders::DrawSepNormal(
 void FModelRenders::DrawTestTexture(FTextureRenderTargetResource* OutTextureRenderTargetResource, FRHICommandListImmediate& RHICmdList, ERHIFeatureLevel::Type FeatureLevel, struct FCubismRenderState* tp_States)
 {
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, OutTextureRenderTargetResource->TextureRHI);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparateTest"));

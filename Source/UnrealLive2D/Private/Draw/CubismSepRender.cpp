@@ -109,7 +109,7 @@ static void DrawSeparateToRenderTarget_RenderThread(
         //////////////////////////////////////////////////////////////////////////
         {
             FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-            RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+            RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
             FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, OutTextureRenderTargetResource->TextureRHI);
             RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawClear"));

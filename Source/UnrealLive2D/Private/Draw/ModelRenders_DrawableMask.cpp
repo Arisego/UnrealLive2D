@@ -193,7 +193,7 @@ void FModelRenders::_DrawSepMask_Normal(
 
     //////////////////////////////////////////////////////////////////////////
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparate"));
@@ -323,7 +323,7 @@ void FModelRenders::_DrawSepMask_Normal(
 
      //////////////////////////////////////////////////////////////////////////
      FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-     RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+     RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
      FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
      RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparate"));

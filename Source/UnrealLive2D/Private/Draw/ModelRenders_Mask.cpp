@@ -137,7 +137,7 @@ void FModelRenders::RenderMask_Full(
     //////////////////////////////////////////////////////////////////////////
     FRHITexture2D* RenderTargetTexture = tp_States->MaskBuffer;
 
-    RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, RenderTargetTexture);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawMask01"));
@@ -290,7 +290,7 @@ void FModelRenders::RenderMask_Single(
     //////////////////////////////////////////////////////////////////////////
     FRHITexture2D* RenderTargetTexture = tp_States->MaskBuffer;
 
-    RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, RenderTargetTexture);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawMask02"));
