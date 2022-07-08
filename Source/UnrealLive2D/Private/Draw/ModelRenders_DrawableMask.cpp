@@ -48,10 +48,10 @@ public:
     void SetParameters(
         FRHICommandListImmediate& RHICmdList,
         const TShaderRHIParamRef ShaderRHI,
-        const FMatrix& InProjectMatrix,
-        const FMatrix& InClipMatrix,
-        const FVector4& InBaseColor,
-        const FVector4& InChannelFlag,
+        const FMatrix44f& InProjectMatrix,
+        const FMatrix44f& InClipMatrix,
+        const FVector4f& InBaseColor,
+        const FVector4f& InChannelFlag,
         FTextureRHIRef MainTextureRef,
         FTextureRHIRef MaskTextureRef
     )
@@ -193,7 +193,7 @@ void FModelRenders::_DrawSepMask_Normal(
 
     //////////////////////////////////////////////////////////////////////////
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparate"));
@@ -232,15 +232,17 @@ void FModelRenders::_DrawSepMask_Normal(
 
         //////////////////////////////////////////////////////////////////////////
         /** Drawable draw */
-        FIndexBufferRHIRef IndexBufferRHI = tp_States->IndexBuffers.FindRef(drawableIndex);
-        FVertexBufferRHIRef ScratchVertexBufferRHI = tp_States->VertexBuffers.FindRef(drawableIndex);
-        FTextureRHIRef tsr_TextureRHI = tp_Texture->Resource->TextureRHI;
+        FBufferRHIRef IndexBufferRHI = tp_States->IndexBuffers.FindRef(drawableIndex);
+        FBufferRHIRef ScratchVertexBufferRHI = tp_States->VertexBuffers.FindRef(drawableIndex);
+
+        check(tp_Texture->GetResource());
+        FTextureRHIRef tsr_TextureRHI = tp_Texture->GetResource()->TextureRHI;
 
         FillVertexBuffer(tp_Model, drawableIndex, ScratchVertexBufferRHI, tp_States, RHICmdList);
 
         //////////////////////////////////////////////////////////////////////////
         // TODO: ModelColor
-        FVector4 ts_BaseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+        FVector4f ts_BaseColor = FVector4f(1.0f, 1.0f, 1.0f, 1.0f);
         ts_BaseColor.W = tf_Opacity;
 
         /** TODO: If find some model use this */
@@ -250,8 +252,8 @@ void FModelRenders::_DrawSepMask_Normal(
         GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader_Mask.GetPixelShader();
 
         static FMatrix ts_FakeGlobal = FMatrix::Identity;
-        FMatrix ts_MartixForDraw;
-        FVector4 ts_ChanelFlag;
+        FMatrix44f ts_MartixForDraw;
+        FVector4f ts_ChanelFlag;
 
         {
             // チャンネル
@@ -262,10 +264,10 @@ void FModelRenders::_DrawSepMask_Normal(
             csmRectF* rect = clipContext->_layoutBounds;
 
             ts_MartixForDraw = ConvertCubismMatrix(clipContext->_matrixForDraw);
-            ts_ChanelFlag = FVector4(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
+            ts_ChanelFlag = FVector4f(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
         }
 
-        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
+        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit,0);
 
         UE_LOG(LogCubism, Verbose, TEXT("_matrixForDraw: %s"), *ts_MartixForDraw.ToString());
         UE_LOG(LogCubism, Verbose, TEXT("_matrixForMask: %s"), *ConvertCubismMatrix(clipContext->_matrixForMask).ToString());
@@ -323,7 +325,7 @@ void FModelRenders::_DrawSepMask_Normal(
 
      //////////////////////////////////////////////////////////////////////////
      FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-     RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
+     RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
 
      FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
      RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparate"));
@@ -361,15 +363,17 @@ void FModelRenders::_DrawSepMask_Normal(
 
          //////////////////////////////////////////////////////////////////////////
          /** Drawable draw */
-         FIndexBufferRHIRef IndexBufferRHI = tp_States->IndexBuffers.FindRef(drawableIndex);
-         FVertexBufferRHIRef ScratchVertexBufferRHI = tp_States->VertexBuffers.FindRef(drawableIndex);
-         FTextureRHIRef tsr_TextureRHI = tp_Texture->Resource->TextureRHI;
+         FBufferRHIRef IndexBufferRHI = tp_States->IndexBuffers.FindRef(drawableIndex);
+         FBufferRHIRef ScratchVertexBufferRHI = tp_States->VertexBuffers.FindRef(drawableIndex);
+
+         check(tp_Texture->GetResource());
+         FTextureRHIRef tsr_TextureRHI = tp_Texture->GetResource()->TextureRHI;
 
          FillVertexBuffer(tp_Model, drawableIndex, ScratchVertexBufferRHI, tp_States, RHICmdList);
 
          //////////////////////////////////////////////////////////////////////////
          // TODO: ModelColor
-         FVector4 ts_BaseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+         FVector4f ts_BaseColor = FVector4f(1.0f, 1.0f, 1.0f, 1.0f);
          ts_BaseColor.W = tf_Opacity;
 
          GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader_Mask.GetVertexShader();
@@ -377,8 +381,8 @@ void FModelRenders::_DrawSepMask_Normal(
 
 
          static FMatrix ts_FakeGlobal = FMatrix::Identity;
-         FMatrix ts_MartixForDraw;
-         FVector4 ts_ChanelFlag;
+         FMatrix44f ts_MartixForDraw;
+         FVector4f ts_ChanelFlag;
 
          {
              // チャンネル
@@ -389,10 +393,10 @@ void FModelRenders::_DrawSepMask_Normal(
              csmRectF* rect = clipContext->_layoutBounds;
 
              ts_MartixForDraw = ConvertCubismMatrix(clipContext->_matrixForDraw);
-             ts_ChanelFlag = FVector4(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
+             ts_ChanelFlag = FVector4f(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
          }
 
-         SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
+         SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0);
 
          UE_LOG(LogCubism, Verbose, TEXT("_matrixForDraw: %s"), *ts_MartixForDraw.ToString());
          UE_LOG(LogCubism, Verbose, TEXT("_matrixForMask: %s"), *ConvertCubismMatrix(clipContext->_matrixForMask).ToString());

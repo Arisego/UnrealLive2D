@@ -16,8 +16,8 @@ struct FCubismRenderState
 {
     Csm::csmVector<Csm::csmInt32>                 _sortedDrawableIndexList;       ///< 描画オブジェクトのインデックスを描画順に並べたリスト
 
-    TMap<int32, FIndexBufferRHIRef> IndexBuffers;
-    TMap<int32, FVertexBufferRHIRef> VertexBuffers;
+    TMap<int32, FBufferRHIRef> IndexBuffers;
+    TMap<int32, FBufferRHIRef> VertexBuffers;
     TMap<int32, int32> VertexCount;
 
     TArray<UTexture2D*> Textures;

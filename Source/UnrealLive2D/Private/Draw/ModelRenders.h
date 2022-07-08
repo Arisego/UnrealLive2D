@@ -5,6 +5,7 @@
 #include "RenderResource.h"
 #include "RHICommandList.h"
 #include "RHIDefinitions.h"
+#include "NoExportTypes.h"
 
 //////////////////////////////////////////////////////////////////////////
 // See CommonRenderResources.cpp
@@ -12,8 +13,8 @@
 /** The vertex data used to filter a texture. */
 struct FCubismVertex
 {
-    FVector2D Position;
-    FVector2D UV;
+    FVector2f Position;
+    FVector2f UV;
 
     FCubismVertex(float x, float y, float z, float w)
         : Position(x, y)
@@ -63,7 +64,7 @@ struct FModelRenders
     static void FillVertexBuffer(
         Csm::CubismModel* tp_Model,
         const Csm::csmInt32 drawableIndex,
-        FVertexBufferRHIRef ScratchVertexBufferRHI,
+        FBufferRHIRef ScratchVertexBufferRHI,
         FCubismRenderState* tp_States,
         FRHICommandListImmediate& RHICmdList
     );
@@ -74,7 +75,7 @@ struct FModelRenders
         FCubismRenderState* tp_States
     );
 
-    static FMatrix ConvertCubismMatrix(Csm::CubismMatrix44& InCubismMartix);
+    static FMatrix44f ConvertCubismMatrix(Csm::CubismMatrix44& InCubismMartix);
 
 
     /** Normal Drawable draw */
