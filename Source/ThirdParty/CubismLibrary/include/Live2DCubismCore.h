@@ -75,7 +75,9 @@ extern "C"
         /** Flag set when render order did change. */
         csmRenderOrderDidChange = 1 << 4,
         /** Flag set when vertex positions did change. */
-        csmVertexPositionsDidChange = 1 << 5
+        csmVertexPositionsDidChange = 1 << 5,
+        /** Flag set when blend color did change. */
+        csmBlendColorDidChange = 1 << 6
     };
 
     /** Bitfield. */
@@ -90,12 +92,27 @@ extern "C"
         csmMocVersion_30 = 1,
         /** moc3 file version 3.3.00 - 3.3.03 */
         csmMocVersion_33 = 2,
-        /** moc3 file version 4.0.00 - */
-        csmMocVersion_40 = 3
+        /** moc3 file version 4.0.00 - 4.1.05 */
+        csmMocVersion_40 = 3,
+        /** moc3 file version 4.2.00 - */
+        csmMocVersion_42 = 4
     };
 
     /** moc3 version identifier. */
     typedef unsigned int csmMocVersion;
+
+    /** Parameter types. */
+    enum
+    {
+        /** Normal parameter. */
+        csmParameterType_Normal = 0,
+
+        /** Parameter for blend shape. */
+        csmParameterType_BlendShape = 1
+    };
+
+    /** Parameter type. */
+    typedef int csmParameterType;
 
     /** 2 component vector. */
     typedef struct
@@ -106,6 +123,22 @@ extern "C"
         /** Second component. */
         float Y;
     } csmVector2;
+
+    /** 4 component vector. */
+    typedef struct
+    {
+        /** 1st component. */
+        float X;
+
+        /** 2nd component. */
+        float Y;
+
+        /** 3rd component. */
+        float Z;
+
+        /** 4th component. */
+        float W;
+    } csmVector4;
 
     /** Log handler.
      *
@@ -252,6 +285,16 @@ extern "C"
      * @return  Valid pointer on success; '0' otherwise.
      */
     csmApi const char** csmCallingConvention csmGetParameterIds(const csmModel* model);
+
+
+    /**
+     * Gets parameter types.
+     *
+     * @param  model  Model to query.
+     *
+     * @return  Valid pointer on success; '0' otherwise.
+     */
+    csmApi const csmParameterType* csmCallingConvention csmGetParameterTypes(const csmModel* model);
 
     /**
      * Gets minimum parameter values.
@@ -489,6 +532,33 @@ extern "C"
      * @return  Valid pointer on success; '0' otherwise.
      */
     csmApi const unsigned short** csmCallingConvention csmGetDrawableIndices(const csmModel* model);
+
+    /**
+     * Gets multiply color data for each drawable.
+     *
+     * @param  model  Model to query.
+     *
+     * @return  Valid pointer on success; '0' otherwise.
+     */
+    csmApi const csmVector4* csmCallingConvention csmGetDrawableMultiplyColors(const csmModel* model);
+
+    /**
+     * Gets screen color data for each drawable.
+     *
+     * @param  model  Model to query.
+     *
+     * @return  Valid pointer on success; '0' otherwise.
+     */
+    csmApi const csmVector4* csmCallingConvention csmGetDrawableScreenColors(const csmModel* model);
+
+    /**
+    * Gets drawable's parent part indices.
+    *
+    * @param   model   Model to query.
+    *
+    * @return  Valid pointer on success; '0' otherwise.
+    */
+    csmApi const int* csmCallingConvention csmGetDrawableParentPartIndices(const csmModel* model);
 
     /**
      * Resets all dynamic drawable flags.

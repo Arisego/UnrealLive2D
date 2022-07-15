@@ -5,13 +5,80 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## 2022-07-07
+
+### Added
+
+* Add functions
+  * `csmGetParameterTypes`
+  * `csmGetDrawableParentPartIndices`
+
+* Add type `csmMocVersion` and enum. This type is the return value of `csmGetMocVersion`, `csmGetLatestMocVersion`.
+
+### Changed
+
+* Upgrade Core version to 04.02.0002.
+
+
+## 2022-06-02
+
+### Changed
+
+* Upgrade Core version to 04.02.0001.
+
+### Fixed
+
+* Fixed a bug that caused Multiply Color / Screen Color of different objects to be applied.
+
+
+## 2022-05-19
+
+### Added
+
+* Support new Multiply Color / Screen Color features.
+* Support new Blend Shape features.
+
+### Changed
+
+* Upgrade Core version to 04.02.0000. This upgrade is following Cubism Editor 4.2 features.
+
+
+## 2022-02-10
+
+### Added
+
+* [Unity] Add bitcode library(.bc) for Emscripten latest version build.
+
+### Changed
+
+* [Unity] Change the bitcode file directory location.
+  * emsdk latest version build bitcode file in `latest` directory.
+  * emsdk 1.38.48 build bitcode file in `1_38_48` directory.
+
+
+## 2021-12-09
+
+### Added
+
+* Add static library(.a) for Mac Catalyst.
+
+
+## 2021-10-07
+
+### Added
+
+* Add `x86_64` library for Android.
+* Add `arm64` library for macOS.
+
+
 ## 2021-03-09
 
 ### Added
-* Add funtcions for Viewer.
 
+* Add funtcions for Viewer.
   * `csmGetParameterKeyCounts`
   * `csmGetParameterKeyValues`
+
 
 ### Changed
 

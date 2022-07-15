@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "CubismJsonHolder.hpp"
 #include "Utils/CubismJson.hpp"
 #include "Math/CubismVector2.hpp"
 #include "Id/CubismId.hpp"
@@ -18,7 +19,7 @@ namespace Live2D { namespace Cubism { namespace Framework {
  *
  * physics3.jsonのコンテナ。
  */
-class CubismPhysicsJson
+class CubismPhysicsJson : public CubismJsonHolder
 {
 public:
     /**
@@ -55,6 +56,16 @@ public:
      * @return 風
      */
     CubismVector2 GetWind() const;
+
+    /**
+     * @brief 物理演算設定FPSの取得
+     *
+     * 物理演算の想定FPSを取得する。
+     * physics3.jsonにFPS情報が存在しない場合、0.0fを返す。
+     *
+     * @return 物理演算設定FPS
+     */
+    csmFloat32 GetFps() const;
 
     /**
      * @brief 物理点の管理の個数の取得
@@ -346,10 +357,6 @@ public:
     * @return 物理点の位置
     */
     CubismVector2 GetParticlePosition(csmInt32 physicsSettingIndex, csmInt32 vertexIndex) const;
-
-private:
-    Utils::CubismJson* _json;           ///< physics3.jsonデータ
-
 };
 
 }}}

@@ -68,7 +68,7 @@ public:
      * 優先度を設定してモーションを開始する。
      *
      * @param[in]   motion          モーション
-     * @param[in]   autoDelete      再生が狩猟したモーションのインスタンスを削除するならtrue
+     * @param[in]   autoDelete      再生が終了したモーションのインスタンスを削除するならtrue
      * @param[in]   priority        優先度
      * @return                      開始したモーションの識別番号を返す。個別のモーションが終了したか否かを判定するIsFinished()の引数で使用する。開始できない時は「-1」
      */
@@ -81,10 +81,11 @@ public:
      *
      * @param[in]   model   対象のモデル
      * @param[in]   deltaTimeSeconds    デルタ時間[秒]
+     * @param[in][out]   opacity 透明度の値（Nullable）
      * @retval  true    更新されている
      * @retval  false   更新されていない
      */
-    csmBool UpdateMotion(CubismModel* model, csmFloat32 deltaTimeSeconds);
+    csmBool UpdateMotion(CubismModel* model, csmFloat32 deltaTimeSeconds, csmFloat32* opacity = NULL);
 
     /**
      * @brief モーションの予約
