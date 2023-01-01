@@ -136,9 +136,9 @@ void FModelRenders::DrawSepNormal(
     check(indexCount > 0&& "Bad Index Count");
 
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
+    RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
-    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
+    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparate"));
     {
         FIntPoint DisplacementMapResolution(OutTextureRenderTargetResource->GetSizeX(), OutTextureRenderTargetResource->GetSizeY());
@@ -215,9 +215,9 @@ void FModelRenders::DrawSepNormal(
 void FModelRenders::DrawTestTexture(FTextureRenderTargetResource* OutTextureRenderTargetResource, FRHICommandListImmediate& RHICmdList, ERHIFeatureLevel::Type FeatureLevel, struct FCubismRenderState* tp_States)
 {
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
+    RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
-    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, OutTextureRenderTargetResource->TextureRHI);
+    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawSeparateTest"));
     {
 

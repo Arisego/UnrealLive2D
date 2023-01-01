@@ -137,9 +137,9 @@ void FModelRenders::RenderMask_Full(
     //////////////////////////////////////////////////////////////////////////
     FRHITexture2D* RenderTargetTexture = tp_States->MaskBuffer;
 
-    RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
+    RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
-    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, RenderTargetTexture);
+    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawMask01"));
     {
 
@@ -292,9 +292,9 @@ void FModelRenders::RenderMask_Single(
     //////////////////////////////////////////////////////////////////////////
     FRHITexture2D* RenderTargetTexture = tp_States->MaskBuffer;
 
-    RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
+    RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
-    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, RenderTargetTexture);
+    FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);
     RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawMask02"));
     {
 

@@ -108,9 +108,9 @@ static void DrawSeparateToRenderTarget_RenderThread(
         //////////////////////////////////////////////////////////////////////////
         {
             FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-            RHICmdList.TransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture);
+            RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
-            FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store, OutTextureRenderTargetResource->TextureRHI);
+            FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);
             RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawClear"));
             RHICmdList.EndRenderPass();
         }
@@ -327,7 +327,20 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
     //Flags |= TexCreate_Dynamic;
     FRHIResourceCreateInfo CreateInfo(TEXT("InitRenderSec"));
     CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
-    RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
+    //RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
+    RenderStates.MaskBuffer = RHICreateTexture(
+        FRHITextureCreateDesc::Create2D(CreateInfo.DebugName)
+        .SetExtent((int32)bufferHeight, (int32)bufferHeight)
+        .SetFormat(EPixelFormat::PF_B8G8R8A8)
+        .SetNumMips(1)
+        .SetNumSamples(1)
+        .SetFlags(Flags)
+        .SetInitialState(ERHIAccess::Unknown)
+        .SetExtData(CreateInfo.ExtData)
+        .SetBulkData(CreateInfo.BulkData)
+        .SetGPUMask(CreateInfo.GPUMask)
+        .SetClearValue(CreateInfo.ClearValueBinding)
+    );
     //TransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture * DepthTexture)
 
     //////////////////////////////////////////////////////////////////////////

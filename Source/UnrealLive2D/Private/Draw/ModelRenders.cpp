@@ -120,8 +120,6 @@ FMatrix44f FModelRenders::ConvertCubismMatrix(Csm::CubismMatrix44& InCubismMarti
     return ts_Mat;
 }
 
-
-
 void FCubismVertexBuffer::InitRHI() 
 {
     // create a static vertex buffer
@@ -156,3 +154,23 @@ void FCubismVertexDeclaration::ReleaseRHI()
 }
 
 TGlobalResource<FCubismVertexDeclaration> GCubismVertexDeclaration;
+
+//////////////////////////////////////////////////////////////////////////
+TArray<FRHITransitionInfo, TInlineAllocator<2>> FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture* DepthTexture)
+{
+    check(DepthStencilMode.IsUsingDepth() || DepthStencilMode.IsUsingStencil());
+
+    TArray<FRHITransitionInfo, TInlineAllocator<2>> Infos;
+
+    DepthStencilMode.EnumerateSubresources([&](ERHIAccess NewAccess, uint32 PlaneSlice)
+        {
+            FRHITransitionInfo Info;
+            Info.Type = FRHITransitionInfo::EType::Texture;
+            Info.Texture = DepthTexture;
+            Info.AccessAfter = NewAccess;
+            Info.PlaneSlice = PlaneSlice;
+            Infos.Emplace(Info);
+        });
+
+    return Infos;
+}
