@@ -10,10 +10,9 @@ The render part take advantage of the [global shader plugin system](https://docs
 
 ## Usage
 
-1. Put this plugin in your project's Plugin folder
-2. Download [Cubism Native SDK](https://www.live2d.com/en/download/cubism-sdk/download-native/) and copy `lib` and `include` to [CubismLibrary](https://github.com/Arisego/Live2DTest/tree/master/Plugins/UnrealLive2D/Source/ThirdParty/CubismLibrary) folder
-
 > A sample of the plugin usage can be found [here](https://github.com/Arisego/Live2DTest).
+
+Put this plugin in your project's Plugin folder will work.
 
 You must donwload the corresponding version of [Cubism Native SDK](https://www.live2d.com/en/download/cubism-sdk/download-native/), or someting may not work as expected.
 
