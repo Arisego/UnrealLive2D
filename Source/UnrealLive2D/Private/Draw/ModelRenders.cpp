@@ -120,7 +120,7 @@ FMatrix44f FModelRenders::ConvertCubismMatrix(Csm::CubismMatrix44& InCubismMarti
     return ts_Mat;
 }
 
-void FCubismVertexBuffer::InitRHI() 
+void FCubismVertexBuffer::InitRHI(FRHICommandListBase& RHICmdList) 
 {
     // create a static vertex buffer
     FRHIResourceCreateInfo CreateInfo(TEXT("CubismVertexBuffer"));
@@ -139,7 +139,7 @@ void FCubismVertexBuffer::InitRHI()
 
 TGlobalResource<FCubismVertexBuffer> GCubismVertexScreenBuffer;
 
-void FCubismVertexDeclaration::InitRHI()
+void FCubismVertexDeclaration::InitRHI(FRHICommandListBase& RHICmdList)
 {
     FVertexDeclarationElementList Elements;
     uint32 Stride = sizeof(FCubismVertex);

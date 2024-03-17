@@ -1,7 +1,3 @@
-/Saved
-/Intermediate
-/Binaries
-/Config
-
-*.lib
-*.a
+Intermediate
+Binaries
+lib

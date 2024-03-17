@@ -26,41 +26,38 @@ FAutoConsoleVariableRef CVarDrawTextureForTest(
     TEXT("cubism.db.texture"),
     GDrawTextureForTest,
     TEXT("Draw texture instead of model for debug"),
-    ECVF_Default
-);
+    ECVF_Default);
 
 static bool GCubismNoMask = false;
 FAutoConsoleVariableRef CVarCubismNoMask(
     TEXT("cubism.db.nomask"),
     GCubismNoMask,
     TEXT("Draw model with no mask"),
-    ECVF_Default
-);
+    ECVF_Default);
 
 #define _DRAW_TEXTURE_ GDrawTextureForTest
 #define _DRAW_MODEL_ (!_DRAW_TEXTURE_)
 
 //////////////////////////////////////////////////////////////////////////
-using Csm::csmInt32;
 using Csm::csmFloat32;
+using Csm::csmInt32;
 using Csm::csmUint16;
 
 struct FCompiledSeparateDraw
 {
-    Csm::CubismModel* InModel = nullptr;
-    FCubismRenderState* InStates = nullptr;
+    Csm::CubismModel *InModel = nullptr;
+    FCubismRenderState *InStates = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////////
 
 static void DrawSeparateToRenderTarget_RenderThread(
-    FRHICommandListImmediate& RHICmdList,
-    const FCompiledSeparateDraw& CompiledSeparateDraw,
-    const FName& TextureRenderTargetName,
-    FTextureRenderTargetResource* OutTextureRenderTargetResource,
+    FRHICommandListImmediate &RHICmdList,
+    const FCompiledSeparateDraw &CompiledSeparateDraw,
+    const FName &TextureRenderTargetName,
+    FTextureRenderTargetResource *OutTextureRenderTargetResource,
     ERHIFeatureLevel::Type FeatureLevel)
 {
-
 
 #if WANTS_DRAW_MESH_EVENTS
     FString EventName;
@@ -72,8 +69,8 @@ static void DrawSeparateToRenderTarget_RenderThread(
 
     //////////////////////////////////////////////////////////////////////////
     check(CompiledSeparateDraw.InModel);
-    Csm::CubismModel* tp_Model = CompiledSeparateDraw.InModel;
-    FCubismRenderState* tp_States = CompiledSeparateDraw.InStates;
+    Csm::CubismModel *tp_Model = CompiledSeparateDraw.InModel;
+    FCubismRenderState *tp_States = CompiledSeparateDraw.InStates;
 
     check(tp_States);
     check(IsInRenderingThread());
@@ -82,13 +79,13 @@ static void DrawSeparateToRenderTarget_RenderThread(
     const bool tb_IsUsingMask = tp_Model->IsUsingMasking();
     if (tb_IsUsingMask)
     {
-        CubismClippingManager_UE* _clippingManager = tp_States->_ClippingManager.Get();
+        CubismClippingManager_UE *_clippingManager = tp_States->_ClippingManager.Get();
         _clippingManager->SetupClippingContext(*tp_Model, tp_States);
 
         /** Draw mask to single texture if in low precise mode */
         if (!tp_States->Get_UseHighPreciseMask())
         {
-			FModelRenders::RenderMask_Full(tp_States, RHICmdList, _clippingManager, FeatureLevel, tp_Model);
+            FModelRenders::RenderMask_Full(tp_States, RHICmdList, _clippingManager, FeatureLevel, tp_Model);
         }
     }
 
@@ -96,7 +93,7 @@ static void DrawSeparateToRenderTarget_RenderThread(
     if (_DRAW_MODEL_)
     {
         const csmInt32 drawableCount = tp_Model->GetDrawableCount();
-        const csmInt32* renderOrder = tp_Model->GetDrawableRenderOrders();
+        const csmInt32 *renderOrder = tp_Model->GetDrawableRenderOrders();
 
         // インデックスを描画順でソート
         for (csmInt32 i = 0; i < drawableCount; ++i)
@@ -107,14 +104,13 @@ static void DrawSeparateToRenderTarget_RenderThread(
 
         //////////////////////////////////////////////////////////////////////////
         {
-            FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
+            FRHITexture2D *RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
             RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
             FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);
             RHICmdList.BeginRenderPass(RPInfo, TEXT("DrawClear"));
             RHICmdList.EndRenderPass();
         }
-
 
         //////////////////////////////////////////////////////////////////////////
 
@@ -148,12 +144,11 @@ static void DrawSeparateToRenderTarget_RenderThread(
 
             //////////////////////////////////////////////////////////////////////////
 
-
             //////////////////////////////////////////////////////////////////////////
             /** Mask relate */
-            CubismClippingContext* clipContext = (tp_States->_ClippingManager.IsValid())
-                ? (*tp_States->_ClippingManager->GetClippingContextListForDraw())[drawableIndex]
-                : NULL;
+            CubismClippingContext *clipContext = (tp_States->_ClippingManager.IsValid())
+                                                     ? (*tp_States->_ClippingManager->GetClippingContextListForDraw())[drawableIndex]
+                                                     : NULL;
             const bool tb_IsMaskDraw = (nullptr != clipContext);
             if (tb_IsMaskDraw)
             {
@@ -176,13 +171,10 @@ static void DrawSeparateToRenderTarget_RenderThread(
             {
                 FModelRenders::DrawSepNormal(OutTextureRenderTargetResource, RHICmdList, FeatureLevel, tp_Model, drawableIndex, tp_States);
             }
-
-
         }
-
     }
 
-    if(_DRAW_TEXTURE_)
+    if (_DRAW_TEXTURE_)
     {
         FModelRenders::DrawTestTexture(OutTextureRenderTargetResource, RHICmdList, FeatureLevel, tp_States);
     }
@@ -190,11 +182,9 @@ static void DrawSeparateToRenderTarget_RenderThread(
     tp_States->bRenderOver = true;
 }
 
-
 void FCubismSepRender::DrawSeparateToRenderTarget(
-    class UWorld* World, 
-    class UTextureRenderTarget2D* OutputRenderTarget
-) const
+    class UWorld *World,
+    class UTextureRenderTarget2D *OutputRenderTarget) const
 {
     check(IsInGameThread());
 
@@ -216,7 +206,7 @@ void FCubismSepRender::DrawSeparateToRenderTarget(
         return;
     }
 
-    Csm::CubismModel* tp_Model = _Model->GetModel();
+    Csm::CubismModel *tp_Model = _Model->GetModel();
     if (!tp_Model)
     {
         UE_LOG(LogCubism, Error, TEXT("FCubismSepRender::DrawSeparateToRenderTarget: GetModel not valid"));
@@ -224,17 +214,17 @@ void FCubismSepRender::DrawSeparateToRenderTarget(
     }
 
     const FName TextureRenderTargetName = OutputRenderTarget->GetFName();
-    FTextureRenderTargetResource* TextureRenderTargetResource = OutputRenderTarget->GameThread_GetRenderTargetResource();
+    FTextureRenderTargetResource *TextureRenderTargetResource = OutputRenderTarget->GameThread_GetRenderTargetResource();
 
     FCompiledSeparateDraw ts_CompiledSeparateDraw;
     ts_CompiledSeparateDraw.InModel = tp_Model;
     ts_CompiledSeparateDraw.InStates = &RenderStates;
 
-
     ERHIFeatureLevel::Type FeatureLevel = World->Scene->GetFeatureLevel();
 
-    ENQUEUE_RENDER_COMMAND(CaptureCommand)(
-        [ts_CompiledSeparateDraw, TextureRenderTargetResource, TextureRenderTargetName, FeatureLevel](FRHICommandListImmediate& RHICmdList)
+    ENQUEUE_RENDER_COMMAND(CaptureCommand)
+    (
+        [ts_CompiledSeparateDraw, TextureRenderTargetResource, TextureRenderTargetName, FeatureLevel](FRHICommandListImmediate &RHICmdList)
         {
             DrawSeparateToRenderTarget_RenderThread(
                 RHICmdList,
@@ -242,11 +232,10 @@ void FCubismSepRender::DrawSeparateToRenderTarget(
                 TextureRenderTargetName,
                 TextureRenderTargetResource,
                 FeatureLevel);
-        }
-    );
+        });
 }
 
-void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FModelConfig& InModelConfig)
+void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FModelConfig &InModelConfig)
 {
     if (!InModel.IsValid())
     {
@@ -257,7 +246,7 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
 
     _Model = InModel;
 
-    Csm::CubismModel* tp_Model = _Model->GetModel();
+    Csm::CubismModel *tp_Model = _Model->GetModel();
     if (!tp_Model)
     {
         /** Model passing to render must be ready */
@@ -268,8 +257,9 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
     csmInt32 td_DrawableCount = tp_Model->GetDrawableCount();
     RenderStates._sortedDrawableIndexList.Resize(td_DrawableCount, 0);
 
-    ENQUEUE_RENDER_COMMAND(CubismInit)(
-        [=](FRHICommandListImmediate& RHICmdList)
+    ENQUEUE_RENDER_COMMAND(CubismInit)
+    (
+        [=, this](FRHICommandListImmediate &RHICmdList)
         {
             for (csmInt32 td_DrawIter = 0; td_DrawIter < td_DrawableCount; td_DrawIter++)
             {
@@ -278,7 +268,7 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
                 if (0 != vcount)
                 {
                     FRHIResourceCreateInfo CreateInfo_Vert(TEXT("CubismInit"));
-                    FBufferRHIRef ScratchVertexBufferRHI = RHICreateVertexBuffer(vcount * sizeof(FCubismVertex), BUF_Dynamic, ERHIAccess::WritableMask, CreateInfo_Vert);
+                    FBufferRHIRef ScratchVertexBufferRHI = RHICmdList.CreateVertexBuffer(vcount * sizeof(FCubismVertex), BUF_Dynamic, ERHIAccess::WritableMask, CreateInfo_Vert);
 
                     RenderStates.VertexBuffers.Add(td_DrawIter, ScratchVertexBufferRHI);
                     RenderStates.VertexCount.Add(td_DrawIter, vcount);
@@ -289,13 +279,13 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
                 const csmInt32 indexCount = tp_Model->GetDrawableVertexIndexCount(td_DrawIter);
                 if (indexCount != 0)
                 {
-                    const csmUint16* indexArray = const_cast<csmUint16*>(tp_Model->GetDrawableVertexIndices(td_DrawIter));
+                    const csmUint16 *indexArray = const_cast<csmUint16 *>(tp_Model->GetDrawableVertexIndices(td_DrawIter));
 
                     FRHIResourceCreateInfo CreateInfo_Indice(TEXT("InitRender"));
-                    FBufferRHIRef IndexBufferRHI = RHICreateIndexBuffer(sizeof(uint16), sizeof(uint16) * indexCount, BUF_Static, CreateInfo_Indice);
-                    void* VoidPtr = RHILockBuffer(IndexBufferRHI, 0, sizeof(uint16) * indexCount, RLM_WriteOnly);
+                    FBufferRHIRef IndexBufferRHI = RHICmdList.CreateIndexBuffer(sizeof(uint16), sizeof(uint16) * indexCount, BUF_Static, CreateInfo_Indice);
+                    void *VoidPtr = RHICmdList.LockBuffer(IndexBufferRHI, 0, sizeof(uint16) * indexCount, RLM_WriteOnly);
                     FMemory::Memcpy(VoidPtr, indexArray, indexCount * sizeof(uint16));
-                    RHIUnlockBuffer(IndexBufferRHI);
+                    RHICmdList.UnlockBuffer(IndexBufferRHI);
 
                     RenderStates.IndexBuffers.Add(td_DrawIter, IndexBufferRHI);
                 }
@@ -303,8 +293,6 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
                 UE_LOG(LogCubism, Log, TEXT("FCubismSepRender::InitRender: [%d/%d] V:%d I:%d"), td_DrawIter, td_DrawableCount, vcount, indexCount);
             }
         });
-
-
 
     LoadTextures();
 
@@ -316,32 +304,30 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
         *tp_Model,
         tp_Model->GetDrawableCount(),
         tp_Model->GetDrawableMasks(),
-        tp_Model->GetDrawableMaskCounts()
-    );
+        tp_Model->GetDrawableMaskCounts());
 
     const csmInt32 bufferHeight = RenderStates._ClippingManager->GetClippingMaskBufferSize();
 
-    ETextureCreateFlags Flags = ETextureCreateFlags(TexCreate_None| TexCreate_RenderTargetable| TexCreate_ShaderResource);
-    //Flags |= TexCreate_RenderTargetable;
-    //Flags |= TexCreate_ShaderResource;
-    //Flags |= TexCreate_Dynamic;
+    ETextureCreateFlags Flags = ETextureCreateFlags(TexCreate_None | TexCreate_RenderTargetable | TexCreate_ShaderResource);
+    // Flags |= TexCreate_RenderTargetable;
+    // Flags |= TexCreate_ShaderResource;
+    // Flags |= TexCreate_Dynamic;
     FRHIResourceCreateInfo CreateInfo(TEXT("InitRenderSec"));
     CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
-    //RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
+    // RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
     RenderStates.MaskBuffer = RHICreateTexture(
         FRHITextureCreateDesc::Create2D(CreateInfo.DebugName)
-        .SetExtent((int32)bufferHeight, (int32)bufferHeight)
-        .SetFormat(EPixelFormat::PF_B8G8R8A8)
-        .SetNumMips(1)
-        .SetNumSamples(1)
-        .SetFlags(Flags)
-        .SetInitialState(ERHIAccess::Unknown)
-        .SetExtData(CreateInfo.ExtData)
-        .SetBulkData(CreateInfo.BulkData)
-        .SetGPUMask(CreateInfo.GPUMask)
-        .SetClearValue(CreateInfo.ClearValueBinding)
-    );
-    //TransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture * DepthTexture)
+            .SetExtent((int32)bufferHeight, (int32)bufferHeight)
+            .SetFormat(EPixelFormat::PF_B8G8R8A8)
+            .SetNumMips(1)
+            .SetNumSamples(1)
+            .SetFlags(Flags)
+            .SetInitialState(ERHIAccess::Unknown)
+            .SetExtData(CreateInfo.ExtData)
+            .SetBulkData(CreateInfo.BulkData)
+            .SetGPUMask(CreateInfo.GPUMask)
+            .SetClearValue(CreateInfo.ClearValueBinding));
+    // TransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture * DepthTexture)
 
     //////////////////////////////////////////////////////////////////////////
     RenderStates.ClearStates();
@@ -354,12 +340,12 @@ void FCubismSepRender::LoadTextures()
 {
     check(_Model.IsValid());
 
-    Csm::ICubismModelSetting* _modelSetting = _Model->Get_ModelSetting();
+    Csm::ICubismModelSetting *_modelSetting = _Model->Get_ModelSetting();
     csmInt32 td_TextureNum = _modelSetting->GetTextureCount();
 
     /** Clear old textures */
     UnLoadTextures();
-	RenderStates.Textures.SetNumZeroed(td_TextureNum);
+    RenderStates.Textures.SetNumZeroed(td_TextureNum);
 
     /** Load new texture */
     for (csmInt32 modelTextureNumber = 0; modelTextureNumber < td_TextureNum; modelTextureNumber++)
@@ -372,7 +358,7 @@ void FCubismSepRender::LoadTextures()
         Csm::csmString texturePath = _modelSetting->GetTextureFileName(modelTextureNumber);
         FString tstr_TempReadPath = _Model->Get_HomeDir() / UTF8_TO_TCHAR(texturePath.GetRawString());
 
-        UTexture2D* tp_LoadedImage = FImageUtils::ImportFileAsTexture2D(tstr_TempReadPath);
+        UTexture2D *tp_LoadedImage = FImageUtils::ImportFileAsTexture2D(tstr_TempReadPath);
         if (IsValid(tp_LoadedImage))
         {
             RenderStates.Textures[modelTextureNumber] = tp_LoadedImage;
@@ -388,13 +374,13 @@ void FCubismSepRender::LoadTextures()
 
 void FCubismSepRender::UnLoadTextures()
 {
-	for (UTexture2D* tp_Texture : RenderStates.Textures)
-	{
-		if (IsValid(tp_Texture))
-		{
-			tp_Texture->RemoveFromRoot();
-		}
-	}
+    for (UTexture2D *tp_Texture : RenderStates.Textures)
+    {
+        if (IsValid(tp_Texture))
+        {
+            tp_Texture->RemoveFromRoot();
+        }
+    }
 
     RenderStates.Textures.Empty();
 }
@@ -413,7 +399,7 @@ bool FCubismRenderState::Get_UseHighPreciseMask() const
         return true;
     }
 
-    /** 
+    /**
      * Low precise is not possible
      * @Note See SetupClippingContext for detail
      */
