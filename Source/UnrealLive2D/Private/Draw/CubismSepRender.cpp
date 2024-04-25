@@ -254,6 +254,8 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
         return;
     }
 
+    LoadTextures();
+
     csmInt32 td_DrawableCount = tp_Model->GetDrawableCount();
     RenderStates._sortedDrawableIndexList.Resize(td_DrawableCount, 0);
 
@@ -292,46 +294,50 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
 
                 UE_LOG(LogCubism, Log, TEXT("FCubismSepRender::InitRender: [%d/%d] V:%d I:%d"), td_DrawIter, td_DrawableCount, vcount, indexCount);
             }
+
+
+
+            //////////////////////////////////////////////////////////////////////////
+            RenderStates._ClippingManager.Reset();
+            RenderStates._ClippingManager = MakeShared<CubismClippingManager_UE>();
+
+            RenderStates._ClippingManager->Initialize(
+                *tp_Model,
+                tp_Model->GetDrawableCount(),
+                tp_Model->GetDrawableMasks(),
+                tp_Model->GetDrawableMaskCounts());
+
+            const csmInt32 bufferHeight = RenderStates._ClippingManager->GetClippingMaskBufferSize();
+
+            ETextureCreateFlags Flags = ETextureCreateFlags(TexCreate_None | TexCreate_RenderTargetable | TexCreate_ShaderResource);
+            // Flags |= TexCreate_RenderTargetable;
+            // Flags |= TexCreate_ShaderResource;
+            // Flags |= TexCreate_Dynamic;
+            FRHIResourceCreateInfo CreateInfo(TEXT("InitRenderSec"));
+            CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
+            // RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
+            RenderStates.MaskBuffer = RHICreateTexture(
+                FRHITextureCreateDesc::Create2D(CreateInfo.DebugName)
+                .SetExtent((int32)bufferHeight, (int32)bufferHeight)
+                .SetFormat(EPixelFormat::PF_B8G8R8A8)
+                .SetNumMips(1)
+                .SetNumSamples(1)
+                .SetFlags(Flags)
+                .SetInitialState(ERHIAccess::Unknown)
+                .SetExtData(CreateInfo.ExtData)
+                .SetBulkData(CreateInfo.BulkData)
+                .SetGPUMask(CreateInfo.GPUMask)
+                .SetClearValue(CreateInfo.ClearValueBinding));
+            // TransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture * DepthTexture)
+
+            //////////////////////////////////////////////////////////////////////////
+            RenderStates.ClearStates();
+            RenderStates.RenderModelConfig = InModelConfig;
         });
 
-    LoadTextures();
 
-    //////////////////////////////////////////////////////////////////////////
-    RenderStates._ClippingManager.Reset();
-    RenderStates._ClippingManager = MakeShared<CubismClippingManager_UE>();
 
-    RenderStates._ClippingManager->Initialize(
-        *tp_Model,
-        tp_Model->GetDrawableCount(),
-        tp_Model->GetDrawableMasks(),
-        tp_Model->GetDrawableMaskCounts());
 
-    const csmInt32 bufferHeight = RenderStates._ClippingManager->GetClippingMaskBufferSize();
-
-    ETextureCreateFlags Flags = ETextureCreateFlags(TexCreate_None | TexCreate_RenderTargetable | TexCreate_ShaderResource);
-    // Flags |= TexCreate_RenderTargetable;
-    // Flags |= TexCreate_ShaderResource;
-    // Flags |= TexCreate_Dynamic;
-    FRHIResourceCreateInfo CreateInfo(TEXT("InitRenderSec"));
-    CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
-    // RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
-    RenderStates.MaskBuffer = RHICreateTexture(
-        FRHITextureCreateDesc::Create2D(CreateInfo.DebugName)
-            .SetExtent((int32)bufferHeight, (int32)bufferHeight)
-            .SetFormat(EPixelFormat::PF_B8G8R8A8)
-            .SetNumMips(1)
-            .SetNumSamples(1)
-            .SetFlags(Flags)
-            .SetInitialState(ERHIAccess::Unknown)
-            .SetExtData(CreateInfo.ExtData)
-            .SetBulkData(CreateInfo.BulkData)
-            .SetGPUMask(CreateInfo.GPUMask)
-            .SetClearValue(CreateInfo.ClearValueBinding));
-    // TransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture * DepthTexture)
-
-    //////////////////////////////////////////////////////////////////////////
-    RenderStates.ClearStates();
-    RenderStates.RenderModelConfig = InModelConfig;
 
     UE_LOG(LogCubism, Log, TEXT("FCubismSepRender::InitRender: Completed"));
 }
