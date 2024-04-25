@@ -71,7 +71,7 @@ bool FRawModel::LoadAsset(const FString& InPath)
     TArray<uint8> tarr_FileData;
     if (!FFileHelper::LoadFileToArray(tarr_FileData, *InPath))
     {
-        UE_LOG(LogCubism, Error, TEXT("FRawModel::LoadAsset: Read <%s> failed!"));
+        UE_LOG(LogCubism, Error, TEXT("FRawModel::LoadAsset: Read <%s> failed!"), *InPath);
         return false;
     }
     

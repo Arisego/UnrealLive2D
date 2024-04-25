@@ -49,11 +49,14 @@ public:
         FTextureRHIRef ShaderResourceTexture
     )
     {
-        SetShaderValue(RHICmdList, ShaderRHI, TestFloat, 1.0f);
-        SetShaderValue(RHICmdList, ShaderRHI, BaseColor, InBaseColor);
+        FRHIBatchedShaderParameters& BatchedParameters = RHICmdList.GetScratchShaderParameters();
+        SetShaderValue(BatchedParameters, TestFloat, 1.0f);
+        SetShaderValue(BatchedParameters, BaseColor, InBaseColor);
+        
+        SetTextureParameter(BatchedParameters, InTexture, ShaderResourceTexture);
+        SetSamplerParameter(BatchedParameters, InTextureSampler, TStaticSamplerState<SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
 
-        SetTextureParameter(RHICmdList, ShaderRHI, InTexture, ShaderResourceTexture);
-        SetSamplerParameter(RHICmdList, ShaderRHI, InTextureSampler, TStaticSamplerState<SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
+        RHICmdList.SetBatchedShaderParameters(ShaderRHI, BatchedParameters);
     }
 
 private:

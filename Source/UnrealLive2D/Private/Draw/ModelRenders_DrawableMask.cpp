@@ -56,16 +56,20 @@ public:
         FTextureRHIRef MaskTextureRef
     )
     {
-        SetShaderValue(RHICmdList, ShaderRHI, TestFloat, 1.0f);
-        SetShaderValue(RHICmdList, ShaderRHI, ProjectMatrix, InProjectMatrix);
-        SetShaderValue(RHICmdList, ShaderRHI, ClipMatrix, InClipMatrix);
-        SetShaderValue(RHICmdList, ShaderRHI, BaseColor, InBaseColor);
-        SetShaderValue(RHICmdList, ShaderRHI, ChannelFlag, InChannelFlag);
+        FRHIBatchedShaderParameters& BatchedParameters = RHICmdList.GetScratchShaderParameters();
+        SetShaderValue(BatchedParameters, TestFloat, 1.0f);
+        SetShaderValue(BatchedParameters, ProjectMatrix, InProjectMatrix);
+        SetShaderValue(BatchedParameters, ClipMatrix, InClipMatrix);
+        SetShaderValue(BatchedParameters, BaseColor, InBaseColor);
+        SetShaderValue(BatchedParameters, ChannelFlag, InChannelFlag);
 
-        SetTextureParameter(RHICmdList, ShaderRHI, MainTexture, MainTextureRef);
-        SetTextureParameter(RHICmdList, ShaderRHI, MaskTexture, MaskTextureRef);
-        SetSamplerParameter(RHICmdList, ShaderRHI, MainTextureSampler, TStaticSamplerState<SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
-        SetSamplerParameter(RHICmdList, ShaderRHI, MaskSampler, TStaticSamplerState<SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
+        SetTextureParameter(BatchedParameters, MainTexture, MainTextureRef);
+        SetTextureParameter(BatchedParameters, MaskTexture, MaskTextureRef);
+
+        SetSamplerParameter(BatchedParameters, MainTextureSampler, TStaticSamplerState<SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
+        SetSamplerParameter(BatchedParameters, MaskSampler, TStaticSamplerState<SF_Trilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
+    
+        RHICmdList.SetBatchedShaderParameters(ShaderRHI, BatchedParameters);
     }
 
 private:
