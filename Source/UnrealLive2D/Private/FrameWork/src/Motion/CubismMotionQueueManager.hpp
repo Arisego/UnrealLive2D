@@ -69,6 +69,18 @@ public:
      *
      * @param[in]   motion          開始するモーション
      * @param[in]   autoDelete      再生が終了したモーションのインスタンスを削除するなら true
+     * @return                      開始したモーションの識別番号を返す。個別のモーションが終了したか否かを判定するIsFinished()の引数で使用する。開始できない時は「-1」
+     */
+    CubismMotionQueueEntryHandle    StartMotion(ACubismMotion* motion, csmBool autoDelete);
+
+    /**
+     * @deprecated 第3引数userTimeSecondsを関数内で使用していないため非推奨。StartMotion(ACubismMotion* motion, csmBool autoDelete)を使用してください。
+     * @brief 指定したモーションの開始
+     *
+     * 指定したモーションを開始する。同じタイプのモーションが既にある場合は、既存のモーションに終了フラグを立て、フェードアウトを開始させる。
+     *
+     * @param[in]   motion          開始するモーション
+     * @param[in]   autoDelete      再生が終了したモーションのインスタンスを削除するなら true
      * @param[in]   userTimeSeconds デルタ時間の積算値[秒]
      * @return                      開始したモーションの識別番号を返す。個別のモーションが終了したか否かを判定するIsFinished()の引数で使用する。開始できない時は「-1」
      */
@@ -114,6 +126,16 @@ public:
     CubismMotionQueueEntry* GetCubismMotionQueueEntry(CubismMotionQueueEntryHandle motionQueueEntryNumber);
 
     /**
+     * @brief CubismMotionQueueEntryの配列の取得
+     *
+     * CubismMotionQueueEntryの配列を取得する。
+     *
+     * @return  CubismMotionQueueEntryの配列へのポインタ
+     * @retval  NULL   見つからなかった
+     */
+    csmVector<CubismMotionQueueEntry*>* GetCubismMotionQueueEntries();
+
+    /**
     * @brief イベントを受け取るCallbackの登録
     *
     * イベントを受け取るCallbackの登録をする。
@@ -131,11 +153,10 @@ protected:
     *
     * @param[in]   model   対象のモデル
     * @param[in]   userTimeSeconds   デルタ時間の積算値[秒]
-    * @param[in][out]   opacity 透明度の値（Nullable）
     * @retval  true    モデルへパラメータ値の反映あり
     * @retval  false   モデルへパラメータ値の反映なし(モーションの変化なし)
     */
-    virtual csmBool     DoUpdateMotion(CubismModel* model, csmFloat32 userTimeSeconds, csmFloat32* opacity = NULL);
+    virtual csmBool     DoUpdateMotion(CubismModel* model, csmFloat32 userTimeSeconds);
 
 
     csmFloat32 _userTimeSeconds;        ///< デルタ時間の積算値[秒]

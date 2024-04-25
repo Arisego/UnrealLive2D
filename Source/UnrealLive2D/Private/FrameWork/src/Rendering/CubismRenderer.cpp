@@ -44,6 +44,11 @@ CubismRenderer::~CubismRenderer()
 
 void CubismRenderer::Initialize(Framework::CubismModel* model)
 {
+    Initialize(model, 1);
+}
+
+void CubismRenderer::Initialize(Framework::CubismModel* model, csmInt32 maskBufferCount)
+{
     _model = model;
 }
 
@@ -101,6 +106,19 @@ CubismRenderer::CubismTextureColor CubismRenderer::GetModelColor() const
     return  _modelColor;
 }
 
+CubismRenderer::CubismTextureColor CubismRenderer::GetModelColorWithOpacity(const csmFloat32 opacity) const
+{
+    CubismTextureColor modelColorRGBA = GetModelColor();
+    modelColorRGBA.A *= opacity;
+    if (IsPremultipliedAlpha())
+    {
+        modelColorRGBA.R *= modelColorRGBA.A;
+        modelColorRGBA.G *= modelColorRGBA.A;
+        modelColorRGBA.B *= modelColorRGBA.A;
+    }
+    return modelColorRGBA;
+}
+
 void CubismRenderer::IsPremultipliedAlpha(csmBool enable)
 {
     _isPremultipliedAlpha = enable;
@@ -144,6 +162,51 @@ void CubismRenderer::UseHighPrecisionMask(csmBool high)
 csmBool CubismRenderer::IsUsingHighPrecisionMask()
 {
     return _useHighPrecisionMask;
+}
+
+/*********************************************************************************************************************
+*                                      CubismClippingContext
+********************************************************************************************************************/
+CubismClippingContext::CubismClippingContext(const csmInt32* clippingDrawableIndices, csmInt32 clipCount)
+{
+    // クリップしている（＝マスク用の）Drawableのインデックスリスト
+    _clippingIdList = clippingDrawableIndices;
+
+    // マスクの数
+    _clippingIdCount = clipCount;
+
+    _layoutChannelIndex = 0;
+
+    _allClippedDrawRect = CSM_NEW csmRectF();
+    _layoutBounds = CSM_NEW csmRectF();
+
+    _clippedDrawableIndexList = CSM_NEW csmVector<csmInt32>();
+}
+
+CubismClippingContext::~CubismClippingContext()
+{
+    if (_layoutBounds != NULL)
+    {
+        CSM_DELETE(_layoutBounds);
+        _layoutBounds = NULL;
+    }
+
+    if (_allClippedDrawRect != NULL)
+    {
+        CSM_DELETE(_allClippedDrawRect);
+        _allClippedDrawRect = NULL;
+    }
+
+    if (_clippedDrawableIndexList != NULL)
+    {
+        CSM_DELETE(_clippedDrawableIndexList);
+        _clippedDrawableIndexList = NULL;
+    }
+}
+
+void CubismClippingContext::AddClippedDrawable(csmInt32 drawableIndex)
+{
+    _clippedDrawableIndexList->PushBack(drawableIndex);
 }
 
 }}}}

@@ -61,6 +61,7 @@ public class UnrealLive2D : ModuleRules
 
 		bUseUnity = false;
 		PrivateDefinitions.Add("CSM_CORE_WIN32_DLL=0");
+		PrivateDefinitions.Add("_DEBUG=UE_BUILD_DEVELOPMENT");
 
 		var ThirdPartyPath = Path.GetFullPath(Path.Combine(ModuleDirectory, "../ThirdParty/"));
     var CubismLibPath = ThirdPartyPath + "CubismLibrary/";

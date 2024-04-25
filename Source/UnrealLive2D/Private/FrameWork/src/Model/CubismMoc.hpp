@@ -29,8 +29,9 @@ public:
      *
      * @param[in]   mocBytes    Mocファイルのバッファ
      * @param[in]   size        バッファのサイズ
+     * @param[in]   shouldCheckMocConsistency MOCの整合性チェックフラグ(初期値 : false)
      */
-    static CubismMoc* Create(const csmByte* mocBytes, csmSizeInt size);
+    static CubismMoc* Create(const csmByte* mocBytes, csmSizeInt size, csmBool shouldCheckMocConsistency = false);
 
     /**
      * @brief Mocデータを削除
@@ -74,6 +75,26 @@ public:
      * @return  読み込んだモデルの.moc3 Version
      */
     Core::csmMocVersion GetMocVersion();
+
+    /**
+     * @brief Checks consistency of a moc.
+     *
+     * @param  address  Address of unrevived moc. The address must be aligned to 'csmAlignofMoc'.
+     * @param  size     Size of moc (in bytes).
+     *
+     * @return  '1' if Moc is valid; '0' otherwise.
+     */
+    static csmBool HasMocConsistency(void* address, const csmUint32 size);
+
+    /**
+     * @brief Checks consistency of a moc.
+     *
+     * @param  mocBytes Mocファイルのバッファ
+     * @param  size     バッファのサイズ
+     *
+     * @return  'true' if Moc is valid; 'false' otherwise.
+     */
+    static csmBool HasMocConsistencyFromUnrevivedMoc(const csmByte* mocBytes, csmSizeInt size);
 
 private:
     /**

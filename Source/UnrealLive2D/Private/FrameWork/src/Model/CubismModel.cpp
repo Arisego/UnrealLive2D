@@ -23,8 +23,10 @@ CubismModel::CubismModel(Core::csmModel* model)
     , _parameterMaximumValues(NULL)
     , _parameterMinimumValues(NULL)
     , _partOpacities(NULL)
+    , _modelOpacity(1.0f)
     , _isOverwrittenModelMultiplyColors(false)
     , _isOverwrittenModelScreenColors(false)
+    , _isOverwrittenCullings(false)
 { }
 
 CubismModel::~CubismModel()
@@ -39,9 +41,9 @@ csmFloat32 CubismModel::GetParameterValue(CubismIdHandle parameterId)
     return GetParameterValue(parameterIndex);
 }
 
-void CubismModel::SetParameterValue(CubismIdHandle parameteId, csmFloat32 value, csmFloat32 weight)
+void CubismModel::SetParameterValue(CubismIdHandle parameterId, csmFloat32 value, csmFloat32 weight)
 {
-    const csmInt32 index = GetParameterIndex(parameteId);
+    const csmInt32 index = GetParameterIndex(parameterId);
     SetParameterValue(index, value, weight);
 }
 
@@ -184,6 +186,12 @@ csmInt32 CubismModel::GetParameterIndex(CubismIdHandle parameterId)
     _notExistParameterValues.AppendKey(parameterIndex);
 
     return parameterIndex;
+}
+
+CubismIdHandle CubismModel::GetParameterId(csmUint32 parameterIndex)
+{
+    CSM_ASSERT(0 <= parameterIndex && parameterIndex < _parameterIds.GetSize());
+    return _parameterIds[parameterIndex];
 }
 
 csmFloat32 CubismModel::GetParameterValue(csmInt32 parameterIndex)
@@ -377,15 +385,19 @@ void CubismModel::Initialize()
         }
     }
 
+    const csmInt32  partCount = Core::csmGetPartCount(_model);
     {
         const csmChar** partIds = Core::csmGetPartIds(_model);
-        const csmInt32  partCount = Core::csmGetPartCount(_model);
 
         _partIds.PrepareCapacity(partCount);
         for (csmInt32 i = 0; i < partCount; ++i)
         {
             _partIds.PushBack(CubismFramework::GetIdManager()->GetId(partIds[i]));
         }
+
+        _userPartMultiplyColors.PrepareCapacity(partCount);
+        _userPartScreenColors.PrepareCapacity(partCount);
+        _partChildDrawables.Resize(partCount);
     }
 
     {
@@ -395,6 +407,12 @@ void CubismModel::Initialize()
         _drawableIds.PrepareCapacity(drawableCount);
         _userMultiplyColors.PrepareCapacity(drawableCount);
         _userScreenColors.PrepareCapacity(drawableCount);
+        _userCullings.PrepareCapacity(drawableCount);
+
+        // カリング設定
+        DrawableCullingData userCulling;
+        userCulling.IsOverwritten = false;
+        userCulling.IsCulling = 0;
 
         // 乗算色
         Rendering::CubismRenderer::CubismTextureColor multiplyColor;
@@ -402,9 +420,6 @@ void CubismModel::Initialize()
         multiplyColor.G = 1.0f;
         multiplyColor.B = 1.0f;
         multiplyColor.A = 1.0f;
-        DrawableColorData userMultiplyColor;
-        userMultiplyColor.IsOverwritten = false;
-        userMultiplyColor.Color = multiplyColor;
 
         // スクリーン色
         Rendering::CubismRenderer::CubismTextureColor screenColor;
@@ -412,23 +427,65 @@ void CubismModel::Initialize()
         screenColor.G = 0.0f;
         screenColor.B = 0.0f;
         screenColor.A = 1.0f;
-        DrawableColorData userScreenColor;
-        userScreenColor.IsOverwritten = false;
-        userScreenColor.Color = screenColor;
 
-        for (csmInt32 i = 0; i < drawableCount; ++i)
+        // Parts
         {
-            _drawableIds.PushBack(CubismFramework::GetIdManager()->GetId(drawableIds[i]));
-            _userMultiplyColors.PushBack(userMultiplyColor);
-            _userScreenColors.PushBack(userScreenColor);
+            // 乗算色
+            PartColorData userMultiplyColor;
+            userMultiplyColor.IsOverwritten = false;
+            userMultiplyColor.Color = multiplyColor;
+
+            // スクリーン色
+            PartColorData userScreenColor;
+            userScreenColor.IsOverwritten = false;
+            userScreenColor.Color = screenColor;
+
+            for (csmInt32 i = 0; i < partCount; ++i)
+            {
+                _userPartMultiplyColors.PushBack(userMultiplyColor);
+                _userPartScreenColors.PushBack(userScreenColor);
+            }
+        }
+
+        // Drawables
+        {
+            // 乗算色
+            DrawableColorData userMultiplyColor;
+            userMultiplyColor.IsOverwritten = false;
+            userMultiplyColor.Color = multiplyColor;
+
+            // スクリーン色
+            DrawableColorData userScreenColor;
+            userScreenColor.IsOverwritten = false;
+            userScreenColor.Color = screenColor;
+
+            for (csmInt32 i = 0; i < drawableCount; ++i)
+            {
+                _drawableIds.PushBack(CubismFramework::GetIdManager()->GetId(drawableIds[i]));
+                _userMultiplyColors.PushBack(userMultiplyColor);
+                _userScreenColors.PushBack(userScreenColor);
+                _userCullings.PushBack(userCulling);
+
+                csmInt32 parentIndex = Core::csmGetDrawableParentPartIndices(_model)[i];
+                if (parentIndex >= 0)
+                {
+                    _partChildDrawables[parentIndex].PushBack(i);
+                }
+            }
         }
     }
 }
 
 CubismIdHandle CubismModel::GetDrawableId(csmInt32 drawableIndex) const
 {
-    const csmChar** parameterIds = Core::csmGetDrawableIds(_model);
-    return CubismFramework::GetIdManager()->GetId(parameterIds[drawableIndex]);
+    CSM_ASSERT(0 <= drawableIndex && drawableIndex < _drawableIds.GetSize());
+    return _drawableIds[drawableIndex];
+}
+
+CubismIdHandle CubismModel::GetPartId(csmUint32 partIndex)
+{
+    CSM_ASSERT(0 <= partIndex && partIndex < _partIds.GetSize());
+    return _partIds[partIndex];
 }
 
 csmInt32 CubismModel::GetPartCount() const
@@ -511,12 +568,6 @@ Core::csmVector4 CubismModel::GetDrawableScreenColor(csmInt32 drawableIndex) con
 csmInt32 CubismModel::GetDrawableParentPartIndex(csmUint32 drawableIndex) const
 {
     return Core::csmGetDrawableParentPartIndices(_model)[drawableIndex];
-}
-
-csmInt32 CubismModel::GetDrawableCulling(csmInt32 drawableIndex) const
-{
-    const Core::csmFlags* constantFlags = Core::csmGetDrawableConstantFlags(_model);
-    return !IsBitSet(constantFlags[drawableIndex], Core::csmIsDoubleSided);
 }
 
 csmBool CubismModel::GetDrawableDynamicFlagIsVisible(csmInt32 drawableIndex) const
@@ -672,6 +723,60 @@ void CubismModel::SetScreenColor(csmInt32 drawableIndex, csmFloat32 r, csmFloat3
     _userScreenColors[drawableIndex].Color.A = a;
 }
 
+Rendering::CubismRenderer::CubismTextureColor CubismModel::GetPartMultiplyColor(csmInt32 partIndex) const
+{
+    return _userPartMultiplyColors[partIndex].Color;
+}
+
+Rendering::CubismRenderer::CubismTextureColor CubismModel::GetPartScreenColor(csmInt32 partIndex) const
+{
+    return _userPartScreenColors[partIndex].Color;
+}
+
+void CubismModel::SetPartMultiplyColor(csmInt32 partIndex, const Rendering::CubismRenderer::CubismTextureColor& color)
+{
+    SetPartMultiplyColor(partIndex, color.R, color.G, color.B, color.A);
+}
+
+void CubismModel::SetPartColor(
+    csmUint32 partIndex,
+    csmFloat32 r, csmFloat32 g, csmFloat32 b, csmFloat32 a,
+    csmVector<PartColorData>& partColors,
+    csmVector <DrawableColorData>& drawableColors)
+{
+    partColors[partIndex].Color.R = r;
+    partColors[partIndex].Color.G = g;
+    partColors[partIndex].Color.B = b;
+    partColors[partIndex].Color.A = a;
+
+    if (partColors[partIndex].IsOverwritten)
+    {
+        for (csmUint32 i = 0; i < _partChildDrawables[partIndex].GetSize(); i++)
+        {
+            csmUint32 drawableIndex = _partChildDrawables[partIndex][i];
+            drawableColors[drawableIndex].Color.R = r;
+            drawableColors[drawableIndex].Color.G = g;
+            drawableColors[drawableIndex].Color.B = b;
+            drawableColors[drawableIndex].Color.A = a;
+        }
+    }
+}
+
+void CubismModel::SetPartMultiplyColor(csmInt32 partIndex, csmFloat32 r, csmFloat32 g, csmFloat32 b, csmFloat32 a)
+{
+    SetPartColor(partIndex, r, g, b, a, _userPartMultiplyColors, _userMultiplyColors);
+}
+
+void CubismModel::SetPartScreenColor(csmInt32 partIndex, const Rendering::CubismRenderer::CubismTextureColor& color)
+{
+    SetPartScreenColor(partIndex, color.R, color.G, color.B, color.A);
+}
+
+void CubismModel::SetPartScreenColor(csmInt32 partIndex, csmFloat32 r, csmFloat32 g, csmFloat32 b, csmFloat32 a)
+{
+    SetPartColor(partIndex, r, g, b, a, _userPartScreenColors, _userScreenColors);
+}
+
 csmBool CubismModel::GetOverwriteFlagForModelMultiplyColors() const
 {
     return _isOverwrittenModelMultiplyColors;
@@ -710,6 +815,96 @@ void CubismModel::SetOverwriteFlagForDrawableMultiplyColors(csmUint32 drawableIn
 void CubismModel::SetOverwriteFlagForDrawableScreenColors(csmUint32 drawableIndex, csmBool value)
 {
     _userScreenColors[drawableIndex].IsOverwritten = value;
+}
+
+csmBool CubismModel::GetOverwriteColorForPartMultiplyColors(csmInt32 partIndex) const
+{
+    return _userPartMultiplyColors[partIndex].IsOverwritten;
+}
+
+csmBool CubismModel::GetOverwriteColorForPartScreenColors(csmInt32 partIndex) const
+{
+    return _userPartScreenColors[partIndex].IsOverwritten;
+}
+
+void CubismModel::SetOverwriteColorForPartColors(
+    csmUint32 partIndex,
+    csmBool value,
+    csmVector<PartColorData>& partColors,
+    csmVector <DrawableColorData>& drawableColors)
+{
+    partColors[partIndex].IsOverwritten = value;
+
+    for (csmUint32 i = 0; i < _partChildDrawables[partIndex].GetSize(); i++)
+    {
+        csmUint32 drawableIndex = _partChildDrawables[partIndex][i];
+        drawableColors[drawableIndex].IsOverwritten = value;
+        if (value)
+        {
+            drawableColors[drawableIndex].Color.R = partColors[partIndex].Color.R;
+            drawableColors[drawableIndex].Color.G = partColors[partIndex].Color.G;
+            drawableColors[drawableIndex].Color.B = partColors[partIndex].Color.B;
+            drawableColors[drawableIndex].Color.A = partColors[partIndex].Color.A;
+        }
+    }
+}
+
+void CubismModel::SetOverwriteColorForPartMultiplyColors(csmUint32 partIndex, csmBool value)
+{
+    _userPartMultiplyColors[partIndex].IsOverwritten = value;
+    SetOverwriteColorForPartColors(partIndex, value, _userPartMultiplyColors, _userMultiplyColors);
+}
+
+void CubismModel::SetOverwriteColorForPartScreenColors(csmUint32 partIndex, csmBool value)
+{
+    _userPartScreenColors[partIndex].IsOverwritten = value;
+    SetOverwriteColorForPartColors(partIndex, value, _userPartScreenColors, _userScreenColors);
+}
+
+csmInt32 CubismModel::GetDrawableCulling(csmInt32 drawableIndex) const
+{
+    if (GetOverwriteFlagForModelCullings() || GetOverwriteFlagForDrawableCullings(drawableIndex))
+    {
+        return _userCullings[drawableIndex].IsCulling;
+    }
+
+    const Core::csmFlags* constantFlags = Core::csmGetDrawableConstantFlags(_model);
+    return !IsBitSet(constantFlags[drawableIndex], Core::csmIsDoubleSided);
+}
+
+void CubismModel::SetDrawableCulling(csmInt32 drawableIndex, csmInt32 isCulling)
+{
+    _userCullings[drawableIndex].IsCulling = isCulling;
+}
+
+csmBool CubismModel::GetOverwriteFlagForModelCullings() const
+{
+    return _isOverwrittenCullings;
+}
+
+void CubismModel::SetOverwriteFlagForModelCullings(csmBool value)
+{
+    _isOverwrittenCullings = value;
+}
+
+csmBool CubismModel::GetOverwriteFlagForDrawableCullings(csmInt32 drawableIndex) const
+{
+    return _userCullings[drawableIndex].IsOverwritten;
+}
+
+void CubismModel::SetOverwriteFlagForDrawableCullings(csmUint32 drawableIndex, csmBool value)
+{
+    _userCullings[drawableIndex].IsOverwritten = value;
+}
+
+csmFloat32 CubismModel::GetModelOpacity()
+{
+    return _modelOpacity;
+}
+
+void CubismModel::SetModelOpacity(csmFloat32 value)
+{
+    _modelOpacity = value;
 }
 
 Core::csmModel* CubismModel::GetModel() const

@@ -19,6 +19,7 @@
 #include "Physics/CubismPhysics.hpp"
 #include "Rendering/CubismRenderer.hpp"
 #include "Model/CubismModelUserData.hpp"
+#include "Motion/CubismExpressionMotionManager.hpp"
 
 namespace Live2D { namespace Cubism { namespace Framework {
 
@@ -137,8 +138,9 @@ public:
      *
      * @param[in]   buffer  moc3ファイルが読み込まれているバッファ
      * @param[in]   size    バッファのサイズ
+     * @param[in]   shouldCheckMocConsistency MOCの整合性チェックフラグ(初期値 : false)
      */
-    virtual void            LoadModel(const csmByte* buffer, csmSizeInt size);
+    virtual void            LoadModel(const csmByte* buffer, csmSizeInt size, csmBool shouldCheckMocConsistency = false);
 
     /**
      * @brief モーションデータの読み込み
@@ -231,7 +233,7 @@ public:
      *  レンダラを生成して初期化を実行する。
      *
      */
-    void CreateRenderer();
+    void CreateRenderer(csmInt32 maskBufferCount = 1);
 
     /**
      *  @brief  レンダラの解放
@@ -268,7 +270,7 @@ protected:
     CubismModel*            _model;                     ///< Modelインスタンス
 
     CubismMotionManager*    _motionManager;             ///< モーション管理
-    CubismMotionManager*    _expressionManager;         ///< 表情管理
+    CubismExpressionMotionManager*    _expressionManager;         ///< 表情管理
     CubismEyeBlink*         _eyeBlink;                  ///< 自動まばたき
     CubismBreath*           _breath;                    ///< 呼吸
     CubismModelMatrix*      _modelMatrix;               ///< モデル行列
@@ -287,6 +289,7 @@ protected:
     csmFloat32  _accelerationX;                 ///< X軸方向の加速度
     csmFloat32  _accelerationY;                 ///< Y軸方向の加速度
     csmFloat32  _accelerationZ;                 ///< Z軸方向の加速度
+    csmBool     _mocConsistency;                ///< MOC3整合性検証するかどうか
     csmBool     _debugMode;                     ///< デバッグモードかどうか
 
 private:

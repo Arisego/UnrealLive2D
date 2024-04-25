@@ -692,11 +692,11 @@ void CubismPhysics::Stabilization(CubismModel* model)
     parameterMinimumValues = Core::csmGetParameterMinimumValues(model->GetModel());
     parameterDefaultValues = Core::csmGetParameterDefaultValues(model->GetModel());
 
-    if (_parameterCaches.GetSize() < (uint32)model->GetParameterCount())
+    if (_parameterCaches.GetSize() < (csmUint32)model->GetParameterCount())
     {
         _parameterCaches.Resize(model->GetParameterCount());
     }
-    if (_parameterInputCaches.GetSize() < (uint32)model->GetParameterCount())
+    if (_parameterInputCaches.GetSize() < (csmUint32)model->GetParameterCount())
     {
         _parameterInputCaches.Resize(model->GetParameterCount());
     }

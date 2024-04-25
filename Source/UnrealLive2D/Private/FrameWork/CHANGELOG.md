@@ -4,6 +4,151 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [5-r.1] - 2024-03-26
+
+### Added
+
+* Add function `ModF()` to compute floating-point remainder in `CubismMath` class.
+
+### Changed
+
+* Change the `Reset()` function of `CubismPose` class to public.
+* Change some processes in the renderer to be handled as functions.
+* Change to output log if the argument `MotionQueueEntry` is `NULL` in the `UpdateFadeWeight()` function of the `ACubismMotion` class.
+
+### Deprecated
+
+* Deprecate the `_fadeWeight` variable and the `GetFadeWeight()` function of the `CubismExpressionMotion` class.
+  * The `_fadeWeight` variable of the `CubismExpressionMotion` class can cause problems.
+  * Please use the `GetFadeWeight()` function of the `CubismExpressionMotionManager` class with one argument from now on.
+* The `StartMotion()` function of the `CubismMotionQueueManager` class with the unnecessary third argument `userTimeSeconds` is deprecated.
+  * Please use the `StartMotion()` function with two arguments from now on.
+
+### Fixed
+
+* Fix a typo in `SetParameterValue()`.
+* Fix an issue that the override keyword is not specified for some functions of classes inheriting from `CubismRenderer`.
+* Fix operator overloading in the `CubismId` class from being private to public.
+* Fix a bug that caused incorrect weight values when expression motions were shared by multiple models.
+  * Change the way fadeWeight is managed for expression motions.
+* Fix shader build error when running nmake in Vulkan.
+
+### Removed
+
+* Remove `CubismSetupMaskedShaderUniforms`, `CubismNormalShaderUniforms`, `CubismMaskedShaderUniforms` and `CubismFragMaskedShaderUniforms` from Metal and merged them into `CubismMaskedShaderUniforms`.
+
+
+## [5-r.1-beta.4] - 2024-01-25
+
+### Fixed
+
+* Fix memory leak in DX11.
+* Fix an issue where models with a specific number of masks could not be drawn correctly.
+* Fix to check for null when reading json.
+* Fix an issue that caused some graphics drivers to not render correctly in Vulkan.
+* Fix errors related to semaphore waiting stages.
+* Fix errors that occurs when building with x86 in vulkan.
+
+
+## [5-r.1-beta.3] - 2023-10-12
+
+### Added
+
+* Add `clamp()` to CubismMath.
+
+
+## [5-r.1-beta.2] - 2023-09-28
+
+### Added
+
+* Add a function to the `ACubismMotion` class that sets arbitrary data in the callback. by [@MizunagiKB](https://github.com/MizunagiKB)
+* Add a comment for clarity for the function whose usage is not intuitive.
+
+### Changed
+
+* Change getter functions to get some datas without `GetIdManager` in `CubismModel`.
+
+### Fixed
+
+* Fix a typo in a variable related to the bezier handle restriction state.
+
+
+## [5-r.1-beta.1] - 2023-08-17
+
+### Added
+
+* Add the function to get the ID of a given parameter.(`CubismModel::GetParameterId`)
+* Add the `CubismExpressionMotionManager` class.
+* Add a Renderer for Vulkan API in Windows.
+
+### Changed
+
+* Unify Offscreen drawing-related terminology with `OffscreenSurface`.
+* Change comment guidelines for headers in the `Framework` directory.
+
+### Fixed
+
+* Fix a bug that caused cocos2d-x culling to not be performed correctly.
+* Fix the structure of the class in renderer.
+* Separate the high precision mask process from the clipping mask setup process.
+* Separate shader class from CubismRenderer files for Cocos2d-x, Metal, OpenGL.
+* Fix Metal rendering results on macOS to be similar to OpenGL.
+  * If you want to apply the previous Metal rendering results, change `mipFilter` in `MTLSamplerDescriptor` from `MTLSamplerMipFilterLinear` to `MTLSamplerMipFilterNotMipmapped`.
+* Fix a bug that the value applied by multiply was not appropriate during expression transitions.
+
+### Removed
+
+* Remove several arguments of `DrawMesh` function.
+
+
+## [4-r.7] - 2023-05-25
+
+### Added
+
+* Add some function for checking consistency of MOC3.
+  * Add the function of checking consistency on reviving a MOC3. (`CubismMoc::Create`)
+  * Add the function of checking consistency from unrevived MOC3. (`CubismMoc::HasMocConsistencyFromUnrevivedMoc`)
+* Add some functions to change Multiply and Screen colors on a per part basis.
+
+### Changed
+
+* Change access specifier for `CubismExpressionMotion`.
+* Change to get opacity according to the current time of the motion.
+
+## [4-r.6.2] - 2023-03-16
+
+### Fixed
+
+* Fix a bug that caused double and triple buffering to be disabled on DirectX systems due to multiple render textures in 4-r.6.
+* Fix the condition of splitting the mask buffer according to the number of masks used to be in accordance with the specification.
+* Fix some problems related to Cubism Core.
+  * See `CHANGELOG.md` in Core.
+
+
+## [4-r.6.1] - 2023-03-10
+
+### Added
+
+* Add function to validate MOC3 files.
+
+
+## [4-r.6] - 2023-02-21
+
+### Added
+
+* Add API to allow users to configure culling.
+* The number of render textures used can now be increased arbitrarily.
+  * The maximum number of masks when using multiple render textures has been increased to "number of render textures * 32".
+
+### Fixed
+
+* Fix a bug that models with culling were not rendered correctly in Metal.
+* Fix a bug that caused some masks to be rendered incorrectly when using 17 or more masks in DirectX systems.
+
+### Removed
+
+* Remove unnecessary variable `modelToWorldF` in renderer.
+
 
 ## [4-r.5.1] - 2022-09-15
 
@@ -226,6 +371,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Fix invalid expressions of `CubismCdiJson`.
 
 
+[5-r.1]: https://github.com/Live2D/CubismNativeFramework/compare/5-r.1-beta.4...5-r.1
+[5-r.1-beta.4]: https://github.com/Live2D/CubismNativeFramework/compare/5-r.1-beta.3...5-r.1-beta.4
+[5-r.1-beta.3]: https://github.com/Live2D/CubismNativeFramework/compare/5-r.1-beta.2...5-r.1-beta.3
+[5-r.1-beta.2]: https://github.com/Live2D/CubismNativeFramework/compare/5-r.1-beta.1...5-r.1-beta.2
+[5-r.1-beta.1]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.7...5-r.1-beta.1
+[4-r.7]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.6.2...4-r.7
+[4-r.6.2]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.6.1...4-r.6.2
+[4-r.6.1]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.6...4-r.6.1
+[4-r.6]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.5.1...4-r.6
 [4-r.5.1]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.5...4-r.5.1
 [4-r.5]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.5-beta.5...4-r.5
 [4-r.5-beta.5]: https://github.com/Live2D/CubismNativeFramework/compare/4-r.5-beta.4.1...4-r.5-beta.5
