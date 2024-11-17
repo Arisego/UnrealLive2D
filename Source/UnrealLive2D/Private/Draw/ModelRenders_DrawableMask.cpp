@@ -197,7 +197,7 @@ void FModelRenders::_DrawSepMask_Normal(
     check(indexCount > 0 && "Bad Index Count");
 
     //////////////////////////////////////////////////////////////////////////
-    FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
+    FRHITexture* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
     RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store);
@@ -278,7 +278,7 @@ void FModelRenders::_DrawSepMask_Normal(
         UE_LOG(LogCubism, Verbose, TEXT("_matrixForDraw: %s"), *ts_MartixForDraw.ToString());
         UE_LOG(LogCubism, Verbose, TEXT("_matrixForMask: %s"), *ConvertCubismMatrix(clipContext->_matrixForMask).ToString());
 
-        FTexture2DRHIRef tsr_MaskBuffer = tp_States->MaskBuffer;
+        FTextureRHIRef tsr_MaskBuffer = tp_States->MaskBuffer;
         FTextureRHIRef tsr_MaskTexture = tsr_MaskBuffer->GetTexture2D();
 
         VertexShader_Mask->SetParameters(RHICmdList, VertexShader_Mask.GetVertexShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);
@@ -330,7 +330,7 @@ void FModelRenders::_DrawSepMask_Normal(
      check(indexCount > 0 && "Bad Index Count");
 
      //////////////////////////////////////////////////////////////////////////
-     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
+     FRHITexture* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
      RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
      FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store);
@@ -407,7 +407,7 @@ void FModelRenders::_DrawSepMask_Normal(
          UE_LOG(LogCubism, Verbose, TEXT("_matrixForDraw: %s"), *ts_MartixForDraw.ToString());
          UE_LOG(LogCubism, Verbose, TEXT("_matrixForMask: %s"), *ConvertCubismMatrix(clipContext->_matrixForMask).ToString());
 
-         FTexture2DRHIRef tsr_MaskBuffer = tp_States->MaskBuffer;
+         FTextureRHIRef tsr_MaskBuffer = tp_States->MaskBuffer;
          FTextureRHIRef tsr_MaskTexture = tsr_MaskBuffer->GetTexture2D();
 
          VertexShader_Mask->SetParameters(RHICmdList, VertexShader_Mask.GetVertexShader(), ts_MartixForDraw, ts_MartixForDraw, ts_BaseColor, ts_ChanelFlag, tsr_TextureRHI, tsr_MaskTexture);

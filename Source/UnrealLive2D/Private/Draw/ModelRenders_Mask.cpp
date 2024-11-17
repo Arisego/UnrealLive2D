@@ -140,7 +140,7 @@ void FModelRenders::RenderMask_Full(
 )
 {
     //////////////////////////////////////////////////////////////////////////
-    FRHITexture2D* RenderTargetTexture = tp_States->MaskBuffer;
+    FRHITexture* RenderTargetTexture = tp_States->MaskBuffer;
 
     RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
@@ -295,7 +295,7 @@ void FModelRenders::RenderMask_Single(
     check(_clippingManager);
 
     //////////////////////////////////////////////////////////////////////////
-    FRHITexture2D* RenderTargetTexture = tp_States->MaskBuffer;
+    FRHITexture* RenderTargetTexture = tp_States->MaskBuffer;
 
     RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 

@@ -60,9 +60,7 @@ static void DrawSeparateToRenderTarget_RenderThread(
 {
 
 #if WANTS_DRAW_MESH_EVENTS
-    FString EventName;
-    TextureRenderTargetName.ToString(EventName);
-    SCOPED_DRAW_EVENTF(RHICmdList, SceneCapture, TEXT("DrawSeparateToRenderTarget %s"), *EventName);
+    SCOPED_DRAW_EVENTF(RHICmdList, SceneCapture, TEXT("DrawSeparateToRenderTarget %s"), TextureRenderTargetName);
 #else
     SCOPED_DRAW_EVENT(RHICmdList, DrawSeparateToRenderTarget_RenderThread);
 #endif
@@ -104,7 +102,7 @@ static void DrawSeparateToRenderTarget_RenderThread(
 
         //////////////////////////////////////////////////////////////////////////
         {
-            FRHITexture2D *RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
+            FRHITexture* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
             RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
             FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);
@@ -310,24 +308,18 @@ void FCubismSepRender::InitRender(TSharedPtr<class FRawModel> InModel, const FMo
             const csmInt32 bufferHeight = RenderStates._ClippingManager->GetClippingMaskBufferSize();
 
             ETextureCreateFlags Flags = ETextureCreateFlags(TexCreate_None | TexCreate_RenderTargetable | TexCreate_ShaderResource);
-            // Flags |= TexCreate_RenderTargetable;
-            // Flags |= TexCreate_ShaderResource;
-            // Flags |= TexCreate_Dynamic;
-            FRHIResourceCreateInfo CreateInfo(TEXT("InitRenderSec"));
-            CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
-            // RenderStates.MaskBuffer = RHICreateTexture2D(bufferHeight, bufferHeight, EPixelFormat::PF_B8G8R8A8, 1, 1, Flags, CreateInfo);
-            RenderStates.MaskBuffer = RHICreateTexture(
-                FRHITextureCreateDesc::Create2D(CreateInfo.DebugName)
+            const FRHITextureCreateDesc Desc =
+                FRHITextureCreateDesc::Create2D(TEXT("InitRenderSec"))
                 .SetExtent((int32)bufferHeight, (int32)bufferHeight)
                 .SetFormat(EPixelFormat::PF_B8G8R8A8)
                 .SetNumMips(1)
                 .SetNumSamples(1)
                 .SetFlags(Flags)
                 .SetInitialState(ERHIAccess::Unknown)
-                .SetExtData(CreateInfo.ExtData)
-                .SetBulkData(CreateInfo.BulkData)
-                .SetGPUMask(CreateInfo.GPUMask)
-                .SetClearValue(CreateInfo.ClearValueBinding));
+                .SetGPUMask(FRHIGPUMask::All())
+                .SetClearValue(FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
+
+            RenderStates.MaskBuffer = RHICreateTexture(Desc);
             // TransitionResource(FExclusiveDepthStencil DepthStencilMode, FRHITexture * DepthTexture)
 
             //////////////////////////////////////////////////////////////////////////

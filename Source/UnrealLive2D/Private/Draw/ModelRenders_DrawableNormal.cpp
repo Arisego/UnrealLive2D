@@ -139,7 +139,7 @@ void FModelRenders::DrawSepNormal(
     const csmInt32 indexCount = tp_Model->GetDrawableVertexIndexCount(drawableIndex);
     check(indexCount > 0&& "Bad Index Count");
 
-    FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
+    FRHITexture* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
     RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Load_Store);
@@ -218,7 +218,7 @@ void FModelRenders::DrawSepNormal(
 
 void FModelRenders::DrawTestTexture(FTextureRenderTargetResource* OutTextureRenderTargetResource, FRHICommandListImmediate& RHICmdList, ERHIFeatureLevel::Type FeatureLevel, struct FCubismRenderState* tp_States)
 {
-    FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
+    FRHITexture* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
     RHICmdList.Transition(MakeArrayView(FModelRenders::ConvertTransitionResource(FExclusiveDepthStencil::DepthWrite_StencilWrite, RenderTargetTexture)));
 
     FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store);

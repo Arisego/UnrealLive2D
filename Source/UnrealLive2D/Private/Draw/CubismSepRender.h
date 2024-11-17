@@ -24,7 +24,7 @@ struct FCubismRenderState
 
     TSharedPtr<class CubismClippingManager_UE> _ClippingManager;
 
-    FTexture2DRHIRef MaskBuffer;
+    FTextureRHIRef MaskBuffer;
 
     FModelConfig RenderModelConfig;
 
