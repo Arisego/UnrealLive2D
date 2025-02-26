@@ -1,3 +1,7 @@
+This project is archived. As now we can use Live2D in Unreal with [Official plugin](https://github.com/Live2D/CubismUnrealEngineComponents).
+
+---
+
 # UnRealLive2D
 
 Unreal Engine plugin for Live2D model.
